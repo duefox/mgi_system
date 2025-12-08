@@ -7,7 +7,6 @@ class_name SparseMapView
 
 ## 允许存放的物品类型，如果背包名字重复，可存放的物品类型需要一样
 @export var avilable_types: Array[String] = ["ANY"]
-
 ## --- 视觉配置 ---
 @export_group("Sparse Grid Settings")
 ## 是否绘制网格线
@@ -41,19 +40,15 @@ class_name SparseMapView
 var _highlight_grids: Array[Vector2i] = []
 ## 当前高亮的状态 (可用/冲突)
 var _highlight_state: BaseGridView.State = BaseGridView.State.EMPTY
-
 ## 缓存：当前鼠标所在的网格坐标
 var _current_mouse_grid: Vector2i = -Vector2i.ONE
-
 ## 缓存类型改为 ItemView(用于判断进入/离开物品以显示范围)
 var _current_hover_view: ItemView = null
-
-## 长按检测相关变量
-const LONG_PRESS_TIME: float = 0.5
-var _is_click_pressed_sparse: bool = false
-var _press_time_sparse: float = 0.0
-var _is_long_pressed_triggered_sparse: bool = false
-var _target_item_view_sparse: ItemView = null  # 记录按下的那个 ItemView
+## 交互相关变量
+const INTERACT_INTERVAL: float = 0.4  # 交互间隔 (例如每0.4秒挥动一次稿子)
+var _is_interacting: bool = false     # 是否正在按住交互键
+var _target_interact_view: ItemView = null # 当前交互的目标 View
+var _has_triggered_interaction: bool = false # 本次按压是否已经触发过交互(用于区分短按详情)
 
 
 func _ready() -> void:
@@ -100,18 +95,35 @@ func _ready() -> void:
 	call_deferred("refresh")
 
 
-## 物理帧处理：专门用于长按计时
+## 物理帧处理：持续触发交互
 func _physics_process(_delta: float) -> void:
-	if not _is_click_pressed_sparse:
-		return
+	# 只有在按住状态，且目标有效时才执行
+	if _is_interacting and is_instance_valid(_target_interact_view):
+		# 使用节流函数，每隔 INTERACT_INTERVAL 秒执行一次 _on_interact_tick
+		# "sparse_map_interact" 是节流器的唯一 Key
+		MGIS.throttle("sparse_map_interact", INTERACT_INTERVAL, _on_interact_tick)
+	else:
+		# 保护措施：如果对象丢失或标记错误，重置状态
+		if _is_interacting and not is_instance_valid(_target_interact_view):
+			_stop_interaction()
 
-	if is_instance_valid(_target_item_view_sparse):
-		_press_time_sparse += _delta
-		# 触发长按
-		if _press_time_sparse >= LONG_PRESS_TIME and not _is_long_pressed_triggered_sparse:
-			_is_long_pressed_triggered_sparse = true
-			# 发送长按信号 (仅针对不可拖动物品)
-			MGIS.sig_grid_long_pressed.emit(container_name, _target_item_view_sparse.first_grid, _target_item_view_sparse)
+
+## 交互的回调函数 (由 throttle 触发)
+func _on_interact_tick() -> void:
+	if is_instance_valid(_target_interact_view):
+		# 标记：已经触发过交互了 (这样松开鼠标时就不会弹出详情窗口)
+		_has_triggered_interaction = true
+		
+		# 发送交互信号 (外部逻辑连接此信号来扣除耐久、播放特效等)
+		MGIS.sig_grid_interact_pressed.emit(container_name, _target_interact_view.first_grid, _target_interact_view)
+		#print("SparseMap: Mining... ", _target_interact_view)
+
+
+## 停止交互并重置变量
+func _stop_interaction() -> void:
+	_is_interacting = false
+	_target_interact_view = null
+	# 注意：这里不重置 _has_triggered_interaction，因为它在 Release 中还有用
 
 
 # --- 核心：坐标转换 ---
@@ -239,17 +251,16 @@ func _handle_item_hover(grid_pos: Vector2i) -> void:
 		if _current_hover_view:
 			MGIS.sig_show_item_range.emit(container_name, _current_hover_view)
 
-
 ## 左键按下
 func _handle_left_click_pressed() -> void:
-	# 场景 A: 放置物品
+	# 场景 A: 放置物品 (保持不变)
 	if MGIS.moving_item_service.moving_item:
 		var target_grid = get_target_grid_from_mouse()
 		if MGIS.inventory_service.place_moving_item(self, target_grid):
 			_clear_highlight()
 		return
 
-	# 场景 B: 拾取 或 启动长按
+	# 场景 B: 拾取 或 交互
 	var click_grid = get_grid_under_mouse()
 	var item_view = find_item_view_by_grid(click_grid)
 
@@ -257,38 +268,48 @@ func _handle_left_click_pressed() -> void:
 		var item_data = item_view.data
 
 		if item_data.can_drag:
-			# 可拖拽 -> 直接拾取
+			# 可拖拽 -> 直接拾取 (逻辑不变)
 			MGIS.item_focus_service.item_lose_focus(item_view)
 			MGIS.moving_item_service.move_item_by_grid(container_name, click_grid, Vector2i.ZERO, base_size)
-			grid_hover(click_grid)  # 立即刷新高亮
-
-			# 清理悬停状态 (因为东西被拿走了)
+			grid_hover(click_grid)
 			if _current_hover_view == item_view:
 				MGIS.sig_hide_item_range.emit(container_name, item_view)
 				_current_hover_view = null
 		else:
-			# 不可拖拽 -> 启动长按计时
-			_start_long_press_timer(item_view)
+			# [核心修改] 不可拖拽 -> 启动持续交互
+			_is_interacting = true
+			_target_interact_view = item_view
+			_has_triggered_interaction = false 
+			
+			# 可选：按下瞬间是否立即触发一次？
+			# 如果想立即触发，可以在这里调用一次 _on_interact_tick()
+			# 如果想有前摇（按住一会儿才开始），则交给 _physics_process
+			# 建议：为了手感，通常第一下是立即触发的，或者稍微延迟。MGIS.throttle 默认行为取决于实现。
+			# 这里我们让 physics process 接管，通常会有几十毫秒的自然延迟，手感较好。
 
 
 ## 左键释放
 func _handle_left_click_released() -> void:
-	if not _is_click_pressed_sparse:
+	if not _is_interacting:
 		return
-
-	_is_click_pressed_sparse = false  # 停止计时
-
-	# 如果长按已经触发过了，则什么都不做
-	if _is_long_pressed_triggered_sparse:
-		_is_long_pressed_triggered_sparse = false
-		_target_item_view_sparse = null
-		return
-
-	# 如果没有触发长按，且 View 有效 -> 视为短按 (显示详情)
-	if is_instance_valid(_target_item_view_sparse):
-		MGIS.sig_show_item_detail.emit(container_name, _target_item_view_sparse.first_grid, _target_item_view_sparse)
-		# print("SparseMap: Short Press (Detail) -> ", _target_item_view_sparse)
-		_target_item_view_sparse = null
+	
+	# 停止交互
+	_stop_interaction()
+	
+	# [逻辑判断] 短按 vs 长按
+	# 如果 _has_triggered_interaction 为 false，说明按下的时间很短，throttle 一次都没触发
+	# 此时视为玩家只是想“点击查看详情”
+	if not _has_triggered_interaction:
+		# 这里需要再次确认目标是否有效（虽然 _stop_interaction 清空了变量，但在清空前应该缓存一下，或者利用之前的状态）
+		# 由于 _stop_interaction 已经清空了 _target_interact_view，我们需要在 _handle_left_click_released 开头获取它
+		# 但更简单的做法是：不用 _target_interact_view，而是重新获取鼠标下的格子，或者修改流程。
+		
+		# 修正后的逻辑：重新获取鼠标下的物品来显示详情
+		var click_grid = get_grid_under_mouse()
+		var item_view = find_item_view_by_grid(click_grid)
+		if item_view and not item_view.data.can_drag:
+			MGIS.sig_show_item_detail.emit(container_name, item_view.first_grid, item_view)
+			# print("SparseMap: Short Press (Detail)")
 
 
 ## 右键点击 (进入物品)
@@ -372,15 +393,6 @@ func _clear_highlight() -> void:
 
 
 # --- 辅助函数 ---
-
-
-## 辅助：启动计时器
-func _start_long_press_timer(item_view: ItemView) -> void:
-	_is_click_pressed_sparse = true
-	_press_time_sparse = 0.0
-	_is_long_pressed_triggered_sparse = false
-	_target_item_view_sparse = item_view
-
 
 ## 更新容器大小
 func _update_min_size() -> void:

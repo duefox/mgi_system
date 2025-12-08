@@ -75,12 +75,13 @@ signal sig_item_disallowed(inv_name: String, item_data: BaseItemData)
 ## 显示物品的详情面板
 @warning_ignore("unused_signal")
 signal sig_show_item_detail(inv_name: String, grid_id: Vector2i, Item_view: ItemView)
-## 长按网格
+## 长按交互信号
 @warning_ignore("unused_signal")
-signal sig_grid_long_pressed(inv_name: String, grid_id: Vector2i, Item_view: ItemView)
+signal sig_grid_interact_pressed(inv_name: String, grid_id: Vector2i, Item_view: ItemView)
 ## 显示物品的范围
 @warning_ignore("unused_signal")
 signal sig_show_item_range(inv_name: String, Item_view: ItemView)
+@warning_ignore("unused_signal")
 signal sig_hide_item_range(inv_name: String, Item_view: ItemView)
 ## 进入物品内部
 @warning_ignore("unused_signal")

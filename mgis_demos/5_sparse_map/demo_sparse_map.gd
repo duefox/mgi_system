@@ -7,9 +7,9 @@ var _show_grid_lines: bool = true
 
 func _ready() -> void:
 	MGIS.sig_show_item_detail.connect(_on_show_item_detail)
-	MGIS.sig_grid_long_pressed.connect(_on_grid_long_pressed)
-	MGIS.sig_show_item_range.connect(_on_show_item_range)
-	MGIS.sig_hide_item_range.connect(_on_hide_item_range)
+	MGIS.sig_grid_interact_pressed.connect(_on_grid_interact_pressed)
+	#MGIS.sig_show_item_range.connect(_on_show_item_range)
+	#MGIS.sig_hide_item_range.connect(_on_hide_item_range)
 	MGIS.sig_enter_item.connect(_on_enter_item)
 
 
@@ -18,9 +18,9 @@ func _on_show_item_detail(inv_name: String, _grid_id: Vector2i, Item_view: ItemV
 	print("inv_name:", inv_name, ",item_id:", item_data.item_id)
 
 
-func _on_grid_long_pressed(inv_name: String, _grid_id: Vector2i, Item_view: ItemView) -> void:
+func _on_grid_interact_pressed(inv_name: String, grid_id: Vector2i, Item_view: ItemView) -> void:
 	var item_data: BaseItemData = Item_view.data
-	print("inv_name:", inv_name, ",item_id:", item_data.item_id)
+	print("inv_name:", inv_name, ",grid_id:", grid_id, ",item_id:", item_data.item_id)
 
 
 func _on_show_item_range(inv_name: String, Item_view: ItemView) -> void:
