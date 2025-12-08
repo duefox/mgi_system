@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Multi Grid Inventory System"
+config/name="MGI_System"
 run/main_scene="uid://ywlis4fmaskq"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"

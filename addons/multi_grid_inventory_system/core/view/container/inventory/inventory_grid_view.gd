@@ -60,10 +60,13 @@ func _on_sub_item(container_view: BaseContainerView, grid_id: Vector2i, sub_coun
 func _gui_input(event: InputEvent) -> void:
 	# 点击物品(长按/短按按下逻辑)
 	if event.is_action_pressed(MGIS.input_click):
-		# 1. 放置物品 (Drag & Drop Logic)
+		# 1. 放置物品
 		if not has_taken and MGIS.moving_item_service.moving_item:
-			if MGIS.inventory_service.place_moving_item(_container_view, grid_id):
-				_is_click_pressed = false  # 确保计时器不启动
+			# [核心修改] 获取精确的目标格子，而不是当前的 grid_id
+			var target_grid = _container_view.get_target_grid_from_mouse()
+			# 使用 target_grid 进行放置
+			if MGIS.inventory_service.place_moving_item(_container_view, target_grid):
+				_is_click_pressed = false
 				_long_press_item_data = null
 				return
 		# 2. 格子有物品
@@ -82,7 +85,8 @@ func _gui_input(event: InputEvent) -> void:
 					return
 				# 2.2 拖动物品(先清除物品信息)
 				MGIS.item_focus_service.item_lose_focus(_container_view.find_item_view_by_grid(grid_id))
-				MGIS.moving_item_service.move_item_by_grid(_container_view.container_name, grid_id, offset, get_cell_size())
+				MGIS.moving_item_service.move_item_by_grid(_container_view.container_name, grid_id, Vector2i.ZERO, get_cell_size())
+
 			# 拖动中，堆叠物品则尝试堆叠
 			elif MGIS.moving_item_service.moving_item is StackableData:
 				MGIS.inventory_service.stack_moving_item(_container_view, grid_id)

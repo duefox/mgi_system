@@ -84,6 +84,11 @@ func _init(
 	self.border_color = border_color
 	self.limit_width = limit_width
 	self.limit_height = limit_height
+	# 记录当前拥有的数量
+	if data is StackableData:
+		_owner_amount = data.current_amount
+	else:
+		_owner_amount = 0
 	recalculate_size()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -110,7 +115,11 @@ func _ready() -> void:
 		stack_label.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		add_child(stack_label)
 		# 更新数量
-		update_stack_label()
+		if data.current_amount > 1:
+			stack_label.text = str(data.current_amount)
+			stack_label.visible = true
+		else:
+			stack_label.visible = false
 	# 动态创建一个全屏的 ColorRect 覆盖在自己身上
 	overlay_rect = ColorRect.new()
 	# 设置为全屏填充
@@ -348,9 +357,11 @@ func _draw_rotate_scale(texture: Texture2D) -> void:
 ## 跟随鼠标
 func _process(_delta: float) -> void:
 	if _is_moving:
-		@warning_ignore("integer_division")
-		var cur_size: float = base_size * self.scale.x
-		global_position = get_global_mouse_position() - Vector2(cur_size * _moving_offset) - Vector2(cur_size / 2, cur_size / 2)
+		# 获取当前缩放后的像素大小
+		var current_scale_size = Vector2(width, height) * base_size * self.scale.x
+		# 强制居中对齐
+		# 直接减去物品像素宽高的一半，使鼠标位于物品正中心
+		global_position = get_global_mouse_position() - (current_scale_size / 2.0)
 
 
 ## 处理事件

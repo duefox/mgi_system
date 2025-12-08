@@ -42,9 +42,9 @@ func stack_moving_item(container_view: BaseContainerView, grid_id: Vector2i) -> 
 		MGIS.sig_inv_item_updated.emit(inv_name, grid_id)
 
 
-## 尝试放置正在移动的物品到这个格子
 func place_moving_item(container_view: BaseContainerView, grid_id: Vector2i) -> bool:
 	var inv_name: String = container_view.container_name
+	# 直接使用 grid_id
 	if place_to(inv_name, MGIS.moving_item_service.moving_item, grid_id, container_view.is_slot):
 		MGIS.moving_item_service.clear_moving_item()
 		return true
