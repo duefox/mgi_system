@@ -74,13 +74,17 @@ signal sig_inventory_full(inv_name: String)
 signal sig_item_disallowed(inv_name: String, item_data: BaseItemData)
 ## 显示物品的详情面板
 @warning_ignore("unused_signal")
-signal sig_show_item_detail(inv_name: String, grid_id: Vector2i, item_data: BaseItemData)
+signal sig_show_item_detail(inv_name: String, grid_id: Vector2i, Item_view: ItemView)
 ## 长按网格
 @warning_ignore("unused_signal")
-signal sig_grid_long_pressed(inv_name: String, grid_id: Vector2i, item_data: BaseItemData)
+signal sig_grid_long_pressed(inv_name: String, grid_id: Vector2i, Item_view: ItemView)
 ## 显示物品的范围
 @warning_ignore("unused_signal")
-signal sig_show_item_range(inv_name: String, item_data: BaseItemData)
+signal sig_show_item_range(inv_name: String, Item_view: ItemView)
+signal sig_hide_item_range(inv_name: String, Item_view: ItemView)
+## 进入物品内部
+@warning_ignore("unused_signal")
+signal sig_enter_item(inv_name: String, Item_view: ItemView)
 ## 代理保存
 @warning_ignore("unused_signal")
 signal sig_proxy_save(save_data: Variant, inv_name: String, request_id: int)
@@ -98,6 +102,8 @@ var item_slot_service: ItemSlotService = ItemSlotService.new()
 var moving_item_service: MovingItemService = MovingItemService.new()
 ## 物品焦点业务类（处理鼠标在不在物品上），如有需要可以使用，不要自己new
 var item_focus_service: ItemFocusService = ItemFocusService.new()
+## 稀疏地图网格业务类，如有需要可以使用，不要自己new
+var sparse_map_service: SparseMapService = SparseMapService.new()
 
 ## 当前角色，如果是单角色，不予理会即可，如果是多角色，操作每个角色前应更新这个值
 var current_player: String = DEFAULT_PLAYER

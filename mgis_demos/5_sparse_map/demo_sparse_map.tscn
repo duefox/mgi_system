@@ -1,0 +1,163 @@
+[gd_scene load_steps=7 format=3 uid="uid://bs3f6txyfsac7"]
+
+[ext_resource type="Script" uid="uid://dyf7ryhxklgjf" path="res://mgis_demos/5_sparse_map/demo_sparse_map.gd" id="1_idxss"]
+[ext_resource type="Script" uid="uid://c5rou3jm33pbt" path="res://addons/multi_grid_inventory_system/core/view/item/drop_area_view.gd" id="1_s0sho"]
+[ext_resource type="Script" uid="uid://b3x4mwtjmm4tp" path="res://addons/multi_grid_inventory_system/core/view/container/inventory/inventory_view.gd" id="2_x6g72"]
+[ext_resource type="Texture2D" uid="uid://2regwslxjjo1" path="res://mgis_demos/assets/ui/grid_48.png" id="3_idxss"]
+[ext_resource type="Texture2D" uid="uid://d3dd0kb3hrs4h" path="res://mgis_demos/assets/ui/grid_48_disabled.png" id="4_lhlms"]
+[ext_resource type="Script" uid="uid://bfp6y4qktynqa" path="res://addons/multi_grid_inventory_system/core/view/container/map/sparse_map_view.gd" id="5_x6g72"]
+
+[node name="DemoSparseMap" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_idxss")
+
+[node name="DropAreaView" type="Control" parent="."]
+visible = false
+anchors_preset = 0
+offset_top = 1.0
+offset_right = 1152.0
+offset_bottom = 649.0
+script = ExtResource("1_s0sho")
+metadata/_custom_type_script = "uid://c5rou3jm33pbt"
+
+[node name="SlotInventory" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(240, 460)
+layout_mode = 0
+offset_left = 48.0
+offset_top = 46.0
+offset_right = 288.0
+offset_bottom = 506.0
+color = Color(0.17027, 0.17027, 0.17027, 1)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="SlotInventory"]
+custom_minimum_size = Vector2(215, 366)
+layout_mode = 0
+offset_left = 11.0
+offset_top = 68.0
+offset_right = 226.0
+offset_bottom = 434.0
+horizontal_scroll_mode = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="SlotInventory/ScrollContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="InventorySlotView" type="Control" parent="SlotInventory/ScrollContainer/MarginContainer"]
+custom_minimum_size = Vector2(192, 864)
+layout_mode = 2
+script = ExtResource("2_x6g72")
+container_name = "demo5_slot_inventory"
+container_columns = 4
+container_rows = 18
+activated_rows = 18
+base_size = 48
+gird_background_color_empty = Color(0, 0, 0, 1)
+grid_background_texture = ExtResource("3_idxss")
+grid_background_disabled_texture = ExtResource("4_lhlms")
+stack_num_font_size = 14
+stack_num_color = Color(1, 0, 1, 1)
+metadata/_custom_type_script = "uid://b3x4mwtjmm4tp"
+
+[node name="Label" type="Label" parent="SlotInventory"]
+layout_mode = 1
+offset_left = 7.0
+offset_top = -2.0
+offset_right = 223.0
+offset_bottom = 62.0
+theme_override_font_sizes/font_size = 20
+text = "Slot inventory"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label2" type="Label" parent="SlotInventory"]
+layout_mode = 1
+offset_left = 37.0
+offset_top = -55.0
+offset_right = 253.0
+offset_bottom = 9.0
+theme_override_font_sizes/font_size = 20
+text = "Sparse map -->"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="SparseMap" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 316.0
+offset_top = 12.0
+offset_right = 1130.0
+offset_bottom = 618.0
+color = Color(0.16862746, 0.16862746, 0.16862746, 1)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="SparseMap"]
+custom_minimum_size = Vector2(800, 600)
+layout_mode = 0
+offset_right = 800.0
+offset_bottom = 600.0
+horizontal_scroll_mode = 2
+vertical_scroll_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="SparseMap/ScrollContainer"]
+layout_mode = 2
+
+[node name="MapView" type="Control" parent="SparseMap/ScrollContainer/MarginContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1280, 1280)
+layout_mode = 2
+script = ExtResource("5_x6g72")
+map_width = 40
+map_height = 40
+container_name = "demo5_map"
+container_columns = 40
+container_rows = 40
+activated_rows = 40
+grid_background_texture = ExtResource("3_idxss")
+grid_background_disabled_texture = ExtResource("4_lhlms")
+metadata/_custom_type_script = "uid://bfp6y4qktynqa"
+
+[node name="Btns" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -138.0
+offset_right = 287.0
+grow_vertical = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Btns"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -69.0
+offset_right = 54.0
+offset_bottom = 101.0
+grow_horizontal = 2
+
+[node name="BtnAddItems" type="Button" parent="Btns/VBoxContainer"]
+layout_mode = 2
+text = "Add Test Items"
+
+[node name="BtnSave" type="Button" parent="Btns/VBoxContainer"]
+layout_mode = 2
+text = "Save Game"
+
+[node name="BtnLoad" type="Button" parent="Btns/VBoxContainer"]
+layout_mode = 2
+text = "Load Game"
+
+[node name="BtnToggleMapGrid" type="Button" parent="Btns/VBoxContainer"]
+layout_mode = 2
+text = "Toggle map grid"
+
+[connection signal="pressed" from="Btns/VBoxContainer/BtnAddItems" to="." method="_on_btn_add_items_pressed"]
+[connection signal="pressed" from="Btns/VBoxContainer/BtnSave" to="." method="_on_btn_save_pressed"]
+[connection signal="pressed" from="Btns/VBoxContainer/BtnLoad" to="." method="_on_btn_load_pressed"]
+[connection signal="pressed" from="Btns/VBoxContainer/BtnToggleMapGrid" to="." method="_on_btn_toggle_map_grid_pressed"]
