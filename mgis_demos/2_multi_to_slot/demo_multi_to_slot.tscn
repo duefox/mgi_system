@@ -21,8 +21,8 @@ visible = false
 anchors_preset = 0
 offset_left = 572.0
 offset_top = -1.0
-offset_right = 3132.0
-offset_bottom = 1368.0
+offset_right = 1724.0
+offset_bottom = 647.0
 script = ExtResource("2_3xclp")
 metadata/_custom_type_script = "uid://c5rou3jm33pbt"
 
@@ -63,10 +63,10 @@ grid_background_texture = ExtResource("4_5l7l4")
 grid_background_disabled_texture = ExtResource("5_jrtmk")
 stack_num_font_size = 14
 stack_num_color = Color(1, 0, 1, 1)
-stack_outline_size = 4
 metadata/_custom_type_script = "uid://b3x4mwtjmm4tp"
 
 [node name="InventoryView2" type="Control" parent="Inventory"]
+custom_minimum_size = Vector2(120, 144)
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5

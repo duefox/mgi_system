@@ -22,8 +22,8 @@ script = ExtResource("1_al8bw")
 [node name="DropAreaView" type="Control" parent="."]
 visible = false
 anchors_preset = 0
-offset_right = 2560.0
-offset_bottom = 1369.0
+offset_right = 1152.0
+offset_bottom = 648.0
 script = ExtResource("2_1ct8h")
 metadata/_custom_type_script = "uid://c5rou3jm33pbt"
 
@@ -36,6 +36,7 @@ offset_bottom = 555.0
 color = Color(0.17027, 0.17027, 0.17027, 1)
 
 [node name="InventoryView" type="Control" parent="Inventory"]
+custom_minimum_size = Vector2(288, 576)
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -54,10 +55,10 @@ container_columns = 6
 container_rows = 12
 activated_rows = 8
 base_size = 48
+gird_background_color_empty = Color(2.8878452e-07, 0.19841233, 0.2023448, 1)
 stack_num_font_size = 14
 stack_num_margin = 2
 stack_num_color = Color(1, 0, 0, 1)
-stack_outline_size = 4
 metadata/_custom_type_script = "uid://b3x4mwtjmm4tp"
 
 [node name="Label" type="Label" parent="Inventory"]
@@ -124,6 +125,7 @@ theme_override_font_sizes/font_size = 28
 text = "X"
 
 [node name="ShopView" type="Control" parent="Shop"]
+custom_minimum_size = Vector2(512, 384)
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -148,7 +150,6 @@ grid_background_color_avilable = Color(0, 1, 0, 1)
 stack_num_font_size = 12
 stack_num_margin = 2
 stack_num_color = Color(1, 0, 0, 1)
-stack_outline_size = 4
 metadata/_custom_type_script = "uid://gqt6pq4lt0gw"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]

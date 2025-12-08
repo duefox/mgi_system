@@ -163,12 +163,22 @@ func _ready() -> void:
 func _on_slot_hover() -> void:
 	if not MGIS.moving_item_service.moving_item:
 		return
-	# 移动视图缩放
-	MGIS.moving_item_service.moving_item_view.limit_width = columns
-	MGIS.moving_item_service.moving_item_view.limit_height = rows
-	MGIS.moving_item_service.moving_item_view.base_size = base_size
-	# 网格高亮
-	var is_avilable = MGIS.item_slot_service.get_slot(slot_name).is_item_avilable(MGIS.moving_item_service.moving_item)
+		
+	var moving_view = MGIS.moving_item_service.moving_item_view
+	
+	# 1. 同步样式
+	MGIS.moving_item_service.sync_style_with_container(self) # 假设 ItemSlotView 也有 base_size 等属性
+	
+	# 2. 限制大小 (适配插槽的行列数)
+	# 装备槽有自己的 columns 和 rows，物品必须缩放进去
+	moving_view.limit_width = float(columns)
+	moving_view.limit_height = float(rows)
+	moving_view.recalculate_size()
+	
+	# 3. 网格高亮
+	var slot_data = MGIS.item_slot_service.get_slot(slot_name)
+	var is_avilable = slot_data.is_item_avilable(MGIS.moving_item_service.moving_item)
+	
 	_state = State.AVILABLE if is_avilable and is_empty() else State.INVILABLE
 	queue_redraw()
 
@@ -176,10 +186,13 @@ func _on_slot_hover() -> void:
 ## 失去高亮
 func _on_slot_lose_hover() -> void:
 	if MGIS.moving_item_service.moving_item:
-		# 移动视图缩放
-		MGIS.moving_item_service.moving_item_view.limit_width = 0.0
-		MGIS.moving_item_service.moving_item_view.limit_height = 0.0
-	# 网格高亮还原
+		# 恢复大小
+		var moving_view = MGIS.moving_item_service.moving_item_view
+		if moving_view:
+			moving_view.limit_width = 0.0
+			moving_view.limit_height = 0.0
+			moving_view.recalculate_size()
+			
 	_state = State.NORMAL
 	queue_redraw()
 

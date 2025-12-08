@@ -76,7 +76,7 @@ func rotate_item(inv_name: String, base_size: int) -> void:
 	
 
 ## 同步拖拽物品的样式（大小、字体等）以匹配目标容器
-func sync_style_with_container(container_view: BaseContainerView) -> void:
+func sync_style_with_container(container_view: Control) -> void:
 	if not is_instance_valid(moving_item_view):
 		return
 		

@@ -6,46 +6,109 @@ class_name InventorySlotView
 ## 允许存放的物品类型，如果背包名字重复，可存放的物品类型需要一样
 @export var avilable_types: Array[String] = ["ANY"]
 
+# inventory_slot_view.gd
+
+## [新增] 像素吸附 (对于单格，其实就是鼠标所在的格子，但为了统一接口)
+func get_target_grid_from_mouse() -> Vector2i:
+	var moving_item = MGIS.moving_item_service.moving_item
+	if not moving_item: return Vector2i.ZERO
+	
+	var local_mouse_pos = get_local_mouse_position()
+	# 单格背包强制 1x1
+	var item_pixel_size = Vector2(base_size, base_size) 
+	var raw_top_left_px = local_mouse_pos - (item_pixel_size / 2.0)
+	
+	var target_x = round(raw_top_left_px.x / base_size)
+	var target_y = round(raw_top_left_px.y / base_size)
+	return Vector2i(int(target_x), int(target_y))
+
 
 ## 格子高亮
 func grid_hover(grid_id: Vector2i) -> void:
+	# 1. 调用父类逻辑
 	super(grid_id)
+	
+	# 2. 如果没有拖拽物品，执行普通选中高亮
 	if not MGIS.moving_item_service.moving_item:
 		selected_item(container_name, grid_id)
 		return
-	var moving_item_view = MGIS.moving_item_service.moving_item_view
-	moving_item_view.base_size = base_size
-	moving_item_view.stack_num_color = stack_num_color
-	moving_item_view.stack_num_font = stack_num_font
-	moving_item_view.stack_num_font_size = stack_num_font_size
-	moving_item_view.stack_num_margin = stack_num_margin
-	moving_item_view.stack_num_color = stack_num_color
-	moving_item_view.stack_outline_size = stack_outline_size
-	moving_item_view.stack_outline_color = stack_outline_color
-	moving_item_view.border_width = MGIS.BORDER_WIDTH
-	moving_item_view.corner_radius = MGIS.CORNER_RADIUS
-	moving_item_view.border_color = MGIS.BORDER_COLOR
-	moving_item_view.limit_width = 1.0
-	moving_item_view.limit_height = 1.0
 
-	var moving_item_offset = MGIS.moving_item_service.moving_item_offset
+	# 3. [样式同步] 同步基础样式 (字体、颜色等)
+	MGIS.moving_item_service.sync_style_with_container(self)
+	
+	# 4. [特殊逻辑] 强制限制拖拽物品显示为 1x1
+	# 无论物品原本是 2x2 还是 3x3，在单格容器上方悬停时，必须缩放进格子里
+	var moving_view = MGIS.moving_item_service.moving_item_view
+	if moving_view:
+		moving_view.limit_width = 1.0
+		moving_view.limit_height = 1.0
+		# 强制立即重算尺寸，保证视觉瞬间变小
+		moving_view.recalculate_size()
+
+	# 5. 计算高亮区域
+	# 对于单格背包，形状强制为 1x1，且不需要计算偏移，目标就是当前 grid_id
 	var moving_item = MGIS.moving_item_service.moving_item
-	var item_shape = Vector2i.ONE
-	var grids = _get_grids_by_shape(grid_id - moving_item_offset, item_shape)
-	var has_conflict = item_shape.x * item_shape.y != grids.size() or not MGIS.inventory_service.get_container(container_name).is_item_avilable(moving_item)
+	var item_shape = Vector2i.ONE 
+	
+	# 获取覆盖的格子 (其实就是 grid_id 本身)
+	var grids = _get_grids_by_shape(grid_id, item_shape)
+	
+	# 记录高亮格子 (供 grid_lose_hover 使用)
+	selected_grids = grids 
+
+	# 6. 冲突检测逻辑
+	# 检查容器类型限制 (例如快捷栏可能不限制，但特定单格可能有类型限制)
+	var has_conflict = not MGIS.inventory_service.get_container(container_name).is_item_avilable(moving_item)
+	
 	for grid in grids:
 		if has_conflict:
 			break
-		has_conflict = _grid_map[grid].has_taken
-		var item_view = _grid_item_map.get(grid_id)
-		if has_conflict and item_view:
-			var item_data: BaseItemData = item_view.data
-			if item_data is StackableData:
-				if item_data.item_id == MGIS.moving_item_service.moving_item.item_id and not item_data.is_full():
-					has_conflict = false
+			
+		# 检查格子占用情况
+		var is_taken = _grid_map[grid].has_taken
+		
+		# 堆叠检测
+		if is_taken:
+			var item_view = _grid_item_map.get(grid)
+			if item_view:
+				var item_data: BaseItemData = item_view.data
+				if item_data is StackableData:
+					# ID 相同且未满 -> 允许堆叠 (无冲突)
+					if item_data.item_id == moving_item.item_id and not item_data.is_full():
+						is_taken = false
+		
+		if is_taken:
+			has_conflict = true
+
+	# 7. 渲染状态
 	for grid in grids:
-		var grid_view = _grid_map[grid]
-		grid_view.state = BaseGridView.State.CONFLICT if has_conflict else BaseGridView.State.AVILABLE
+		if _grid_map.has(grid):
+			var grid_view = _grid_map[grid]
+			grid_view.state = BaseGridView.State.CONFLICT if has_conflict else BaseGridView.State.AVILABLE
+
+
+## 格子失去高亮
+func grid_lose_hover(grid_id: Vector2i) -> void:
+	super(grid_id)
+	
+	# [恢复] 如果有拖拽物品，恢复其尺寸限制
+	if MGIS.moving_item_service.moving_item:
+		var moving_view = MGIS.moving_item_service.moving_item_view
+		if moving_view:
+			moving_view.limit_width = 0.0  # 0.0 表示无限制
+			moving_view.limit_height = 0.0
+			moving_view.recalculate_size()
+			
+	if not MGIS.moving_item_service.moving_item:
+		unselected_item()
+		return
+		
+	# 清除高亮
+	for grid in selected_grids:
+		if _grid_map.has(grid):
+			var grid_view = _grid_map[grid]
+			grid_view.state = BaseGridView.State.TAKEN if grid_view.has_taken else BaseGridView.State.EMPTY
+	selected_grids.clear()
 
 
 ## 高亮经过的物品
@@ -63,20 +126,6 @@ func selected_item(shop_name: String, grid_id: Vector2i) -> void:
 		var grid_view: BaseGridView = _grid_map[grid]
 		grid_view.state = BaseGridView.State.AVILABLE
 
-
-## 格子失去高亮
-func grid_lose_hover(grid_id: Vector2i) -> void:
-	super(grid_id)
-	if not MGIS.moving_item_service.moving_item:
-		unselected_item()
-		return
-	var moving_item_offset = MGIS.moving_item_service.moving_item_offset
-	var moving_item = MGIS.moving_item_service.moving_item
-	var item_shape = Vector2i.ONE
-	var grids = _get_grids_by_shape(grid_id - moving_item_offset, item_shape)
-	for grid in grids:
-		var grid_view = _grid_map[grid]
-		grid_view.state = BaseGridView.State.TAKEN if grid_view.has_taken else BaseGridView.State.EMPTY
 
 
 ## 通过格子ID获取物品视图

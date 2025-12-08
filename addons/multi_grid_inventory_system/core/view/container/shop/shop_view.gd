@@ -6,12 +6,45 @@ class_name ShopView
 @export var goods: Array[BaseItemData]
 
 
+## 复制 InventoryView 中的像素吸附辅助函数
+func get_target_grid_from_mouse() -> Vector2i:
+	var moving_item = MGIS.moving_item_service.moving_item
+	if not moving_item:
+		return Vector2i.ZERO
+		
+	var local_mouse_pos = get_local_mouse_position()
+	# 商店里的物品形状，如果商店不允许旋转，这里取默认形状
+	var item_shape = moving_item.get_shape(is_slot)
+	var item_pixel_size = Vector2(item_shape) * float(base_size)
+	var raw_top_left_px = local_mouse_pos - (item_pixel_size / 2.0)
+	
+	var target_x = round(raw_top_left_px.x / base_size)
+	var target_y = round(raw_top_left_px.y / base_size)
+	
+	return Vector2i(int(target_x), int(target_y))
+
+
 ## 格子高亮
 func grid_hover(grid_id: Vector2i) -> void:
 	super(grid_id)
+	
 	if not MGIS.moving_item_service.moving_item:
 		selected_item(container_name, grid_id)
 		return
+
+	# 商店通常用于出售，所以我们只需要同步样式
+	MGIS.moving_item_service.sync_style_with_container(self)
+	
+	# 注意：商店的高亮逻辑通常比较简单（只高亮鼠标下的那一格，或者是售卖高亮）
+	# 如果你的商店支持像背包一样的高亮反馈（比如红色表示不可放），则需要复制 InventoryView 的逻辑。
+	# 但根据 shop_view.gd 源码，原本的 grid_hover 几乎是空的。
+	# 如果你是为了“拖拽出售”，这里甚至不需要做复杂的形状匹配。
+	
+	# 假设我们要高亮显示“这里可以卖”：
+	# 还是建议用简单的单格高亮，因为玩家意图是“卖给商店”，而不是“放在商店的某个位置”
+	# 所以这里保持原样，或者只做简单的 selected_grids 处理。
+	
+	pass 
 
 
 ## 格子失去高亮
