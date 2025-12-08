@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StackableData" load_steps=3 format=3 uid="uid://cuj07urfi512p"]
+
+[ext_resource type="Script" uid="uid://bm5efdrlci0qk" path="res://addons/multi_grid_inventory_system/core/model/item/stackable_data.gd" id="1_beju1"]
+[ext_resource type="Texture2D" uid="uid://dee83vexb4iqj" path="res://mgis_demos/assets/test_item_icons/jewel.png" id="1_bqe4x"]
+
+[resource]
+script = ExtResource("1_beju1")
+stack_size = 99
+current_amount = 66
+item_id = "2001"
+type = "JEWEL"
+item_level = 3
+icon = ExtResource("1_bqe4x")
+metadata/_custom_type_script = "uid://bm5efdrlci0qk"

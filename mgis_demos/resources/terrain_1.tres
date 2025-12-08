@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EquipmentData" load_steps=3 format=3 uid="uid://5rq1wfkujiuv"]
+
+[ext_resource type="Script" uid="uid://c81d67advvltj" path="res://addons/multi_grid_inventory_system/core/model/item/equipment_data.gd" id="1_338k0"]
+[ext_resource type="Texture2D" uid="uid://bibnovni76vyf" path="res://mgis_demos/assets/test_item_icons/bd1.png" id="1_ws23g"]
+
+[resource]
+script = ExtResource("1_338k0")
+item_id = "21000"
+item_type = 8
+can_drag = false
+icon = ExtResource("1_ws23g")
+columns = 6
+rows = 4
+metadata/_custom_type_script = "uid://c81d67advvltj"

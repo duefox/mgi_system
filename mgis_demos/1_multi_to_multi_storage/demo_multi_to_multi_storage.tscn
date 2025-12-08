@@ -1,0 +1,230 @@
+[gd_scene load_steps=6 format=3 uid="uid://ywlis4fmaskq"]
+
+[ext_resource type="Script" uid="uid://8jvttk2cbe1v" path="res://mgis_demos/1_multi_to_multi_storage/demo_multi_to_multi_storage.gd" id="1_d0113"]
+[ext_resource type="Script" uid="uid://c5rou3jm33pbt" path="res://addons/multi_grid_inventory_system/core/view/item/drop_area_view.gd" id="2_qm8v4"]
+[ext_resource type="Script" uid="uid://b3x4mwtjmm4tp" path="res://addons/multi_grid_inventory_system/core/view/container/inventory/inventory_view.gd" id="3_4l8ic"]
+[ext_resource type="Texture2D" uid="uid://2regwslxjjo1" path="res://mgis_demos/assets/ui/grid_48.png" id="4_qpuok"]
+[ext_resource type="Texture2D" uid="uid://d3dd0kb3hrs4h" path="res://mgis_demos/assets/ui/grid_48_disabled.png" id="5_a0rpu"]
+
+[node name="MultiToMulti" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_d0113")
+
+[node name="DropAreaView" type="Control" parent="."]
+visible = false
+anchors_preset = 0
+offset_left = 572.0
+offset_top = -1.0
+offset_right = 1724.0
+offset_bottom = 647.0
+script = ExtResource("2_qm8v4")
+metadata/_custom_type_script = "uid://c5rou3jm33pbt"
+
+[node name="Inventory" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 97.0
+offset_right = 558.0
+offset_bottom = 555.0
+color = Color(0.17027, 0.17027, 0.17027, 1)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Inventory"]
+custom_minimum_size = Vector2(310, 366)
+layout_mode = 0
+offset_left = 12.0
+offset_top = 68.0
+offset_right = 323.0
+offset_bottom = 435.0
+horizontal_scroll_mode = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="Inventory/ScrollContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="InventoryView" type="Control" parent="Inventory/ScrollContainer/MarginContainer"]
+custom_minimum_size = Vector2(288, 864)
+layout_mode = 2
+script = ExtResource("3_4l8ic")
+container_name = "demo1_inventory"
+container_columns = 6
+container_rows = 18
+activated_rows = 6
+base_size = 48
+grid_background_texture = ExtResource("4_qpuok")
+grid_background_disabled_texture = ExtResource("5_a0rpu")
+stack_num_font_size = 14
+stack_num_color = Color(1, 0, 1, 1)
+metadata/_custom_type_script = "uid://b3x4mwtjmm4tp"
+
+[node name="InventoryView2" type="Control" parent="Inventory"]
+custom_minimum_size = Vector2(120, 144)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -296.0
+offset_top = -146.0
+offset_right = -176.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("3_4l8ic")
+container_name = "demo1_inventory"
+container_columns = 10
+container_rows = 12
+base_size = 12
+stack_num_font_size = 4
+stack_num_margin = 1
+metadata/_custom_type_script = "uid://b3x4mwtjmm4tp"
+
+[node name="Label" type="Label" parent="Inventory"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -83.0
+offset_right = 83.0
+offset_bottom = 64.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 32
+text = "Multi inventory"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ButtonCloseInventory" type="Button" parent="Inventory"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -69.0
+offset_top = 9.0
+offset_right = -10.0
+offset_bottom = 54.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 28
+text = "X"
+
+[node name="Storage" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 568.0
+offset_top = 97.0
+offset_right = 1096.0
+offset_bottom = 555.0
+color = Color(0.17027, 0.17027, 0.17027, 1)
+
+[node name="StorageView" type="Control" parent="Storage"]
+custom_minimum_size = Vector2(512, 384)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -256.0
+offset_top = -392.0
+offset_right = 256.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("3_4l8ic")
+container_name = "demo1_storage"
+container_columns = 16
+container_rows = 12
+activated_rows = 10
+grid_border_color = Color(0.7411765, 0.7294118, 0.85490197, 1)
+gird_background_color_empty = Color(0.251759, 0.44292, 0.364007, 1)
+stack_num_font_size = 12
+metadata/_custom_type_script = "uid://b3x4mwtjmm4tp"
+
+[node name="Label" type="Label" parent="Storage"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -112.0
+offset_top = 3.0
+offset_right = 112.0
+offset_bottom = 55.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 32
+text = "Multi storage inventory"
+horizontal_alignment = 1
+
+[node name="ButtonCloseStorage" type="Button" parent="Storage"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -67.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 55.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 28
+text = "X"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+offset_left = 38.0
+offset_top = 97.0
+offset_right = 176.0
+offset_bottom = 268.0
+
+[node name="ButtonToggleInventory" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Toggle Inventory"
+
+[node name="ButtonToggleStorage" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Toggle Storage"
+
+[node name="ButtonAddTestItems" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Add Test Items"
+
+[node name="ButtonSave" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Save Game"
+
+[node name="ButtonLoad" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Load Game"
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 92.0
+offset_top = 562.0
+offset_right = 638.0
+offset_bottom = 611.0
+text = "The small inventory and big inventory share the same name,
+so they mirror each other."
+
+[node name="Label2" type="Label" parent="."]
+layout_mode = 0
+offset_left = 357.0
+offset_top = -1.0
+offset_right = 1075.0
+offset_bottom = 100.0
+theme_override_font_sizes/font_size = 15
+text = "右键：移动一个物品（非堆叠物品直接移动）；Shift +右键：移动全部物品
+按住右键不松开持续移动一个物品直到松开或者数量为零；
+左键：选中物品并拖放；鼠标中键：分割可以堆叠物品数量的一半到手上
+ctrl+右键：移动物品，可以堆叠物品则移动数量的一半"
+
+[connection signal="pressed" from="Inventory/ButtonCloseInventory" to="." method="_on_button_close_inventory_pressed"]
+[connection signal="pressed" from="Storage/ButtonCloseStorage" to="." method="_on_button_close_storage_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonToggleInventory" to="." method="_on_button_toggle_inventory_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonToggleStorage" to="." method="_on_button_toggle_storage_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonAddTestItems" to="." method="_on_button_add_test_items_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonSave" to="." method="_on_button_save_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonLoad" to="." method="_on_button_load_pressed"]

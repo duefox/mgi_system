@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EquipmentData" load_steps=3 format=3 uid="uid://ce8kda8rqy6h2"]
+
+[ext_resource type="Texture2D" uid="uid://h387k1xiin2o" path="res://mgis_demos/assets/test_item_icons/boots.png" id="1_07u3w"]
+[ext_resource type="Script" uid="uid://c81d67advvltj" path="res://addons/multi_grid_inventory_system/core/model/item/equipment_data.gd" id="1_jledh"]
+
+[resource]
+script = ExtResource("1_jledh")
+item_id = "1000"
+type = "BOOTS"
+item_type = 3
+icon = ExtResource("1_07u3w")
+columns = 2
+rows = 2
+metadata/_custom_type_script = "uid://c81d67advvltj"

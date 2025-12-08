@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EquipmentData" load_steps=3 format=3 uid="uid://cwrvd74nqnv64"]
+
+[ext_resource type="Texture2D" uid="uid://nib7qlmdmxj1" path="res://mgis_demos/assets/test_item_icons/armor.png" id="1_ttehi"]
+[ext_resource type="Script" uid="uid://c81d67advvltj" path="res://addons/multi_grid_inventory_system/core/model/item/equipment_data.gd" id="2_8mssm"]
+
+[resource]
+script = ExtResource("2_8mssm")
+item_id = "1001"
+type = "ARMOR"
+item_level = 1
+item_type = 3
+icon = ExtResource("1_ttehi")
+columns = 2
+rows = 3
+metadata/_custom_type_script = "uid://c81d67advvltj"

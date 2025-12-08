@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ConsumableData" load_steps=3 format=3 uid="uid://dpx3omowkx6ty"]
+
+[ext_resource type="Script" uid="uid://x8lw6iyk5rf5" path="res://addons/multi_grid_inventory_system/core/model/item/consumable_data.gd" id="1_pauxt"]
+[ext_resource type="Texture2D" uid="uid://tlkilfmuuy0q" path="res://mgis_demos/assets/test_item_icons/bottle.png" id="1_yk66e"]
+
+[resource]
+script = ExtResource("1_pauxt")
+stack_size = 99
+current_amount = 22
+item_id = "2000"
+type = "POTION"
+icon = ExtResource("1_yk66e")
+rows = 2
+metadata/_custom_type_script = "uid://x8lw6iyk5rf5"

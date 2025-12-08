@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://ofkqypa1vmd7"]
+
+[ext_resource type="Texture2D" uid="uid://bqlnxiuf0y7k0" path="res://mgis_demos/assets/test_item_icons/1006_3x2_a.png" id="1_7vsb7"]
+[ext_resource type="Script" uid="uid://bxpijnb7rr66s" path="res://mgis_demos/core/model/pet_data.gd" id="1_ktpyp"]
+
+[resource]
+script = ExtResource("1_ktpyp")
+item_id = "11000"
+item_type = 0
+columns = 3
+rows = 2
+texture = ExtResource("1_7vsb7")
+hframes = 4
+metadata/_custom_type_script = "uid://c81d67advvltj"

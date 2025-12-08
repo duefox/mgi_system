@@ -1,0 +1,310 @@
+[gd_scene load_steps=9 format=3 uid="uid://cs3nkufghh4vm"]
+
+[ext_resource type="Script" uid="uid://1so58lwsljdv" path="res://mgis_demos/3_multi_to_equip_slot/demo_multi_to_equip.gd" id="1_2uoe3"]
+[ext_resource type="Script" uid="uid://c5rou3jm33pbt" path="res://addons/multi_grid_inventory_system/core/view/item/drop_area_view.gd" id="2_fiolr"]
+[ext_resource type="Script" uid="uid://b3x4mwtjmm4tp" path="res://addons/multi_grid_inventory_system/core/view/container/inventory/inventory_view.gd" id="3_acosg"]
+[ext_resource type="Script" uid="uid://cxxxu558rn2vk" path="res://addons/multi_grid_inventory_system/core/view/slot/item_slot_view.gd" id="4_sfrky"]
+[ext_resource type="Texture2D" uid="uid://dxusr1agnbuhw" path="res://mgis_demos/assets/ui/boots_background.png" id="5_4ol8s"]
+[ext_resource type="Shader" uid="uid://060famlwj5a4" path="res://shaders/cooldown.gdshader" id="6_rdc3o"]
+[ext_resource type="Texture2D" uid="uid://2d7tnhijrqdc" path="res://mgis_demos/assets/ui/grid_32.png" id="7_fplom"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dixdw"]
+shader = ExtResource("6_rdc3o")
+shader_parameter/cooldown_progress = 1.0
+shader_parameter/use_transparency = true
+shader_parameter/transparency_alpha = 0.50000002375
+
+[node name="MultiToEquipmentSlot" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2uoe3")
+
+[node name="Inventory" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 205.0
+offset_top = 96.0
+offset_right = 558.0
+offset_bottom = 554.0
+color = Color(0.17027, 0.17027, 0.17027, 1)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Inventory"]
+custom_minimum_size = Vector2(320, 320)
+layout_mode = 0
+offset_left = 9.0
+offset_top = 63.0
+offset_right = 351.0
+offset_bottom = 383.0
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 2
+
+[node name="InventoryView" type="Control" parent="Inventory/ScrollContainer"]
+custom_minimum_size = Vector2(320, 384)
+layout_mode = 2
+script = ExtResource("3_acosg")
+container_name = "demo2_inventory"
+container_columns = 10
+container_rows = 12
+activated_rows = 8
+stack_num_font_size = 12
+stack_num_margin = 2
+stack_num_color = Color(0.856916, 0.880705, 0.757161, 1)
+metadata/_custom_type_script = "uid://b3x4mwtjmm4tp"
+
+[node name="Label" type="Label" parent="Inventory"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.5
+offset_right = 86.5
+offset_bottom = 64.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 32
+text = "Multi inventory"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ButtonCloseInventory" type="Button" parent="Inventory"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -69.0
+offset_top = 9.0
+offset_right = -10.0
+offset_bottom = 54.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 28
+text = "X"
+
+[node name="Character" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 568.0
+offset_top = 96.0
+offset_right = 972.0
+offset_bottom = 439.0
+color = Color(0.17027, 0.17027, 0.17027, 1)
+
+[node name="Label" type="Label" parent="Character"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -112.0
+offset_top = 3.0
+offset_right = 112.0
+offset_bottom = 55.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 32
+text = "Equip & Hotbar"
+horizontal_alignment = 1
+
+[node name="ButtonCloseStorage" type="Button" parent="Character"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -67.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 55.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 28
+text = "X"
+
+[node name="EquipmentSlotView1" type="Control" parent="Character"]
+custom_minimum_size = Vector2(144, 144)
+anchors_preset = 0
+offset_left = 90.0
+offset_top = 91.0
+offset_right = 234.0
+offset_bottom = 235.0
+script = ExtResource("4_sfrky")
+slot_name = "demo2_slot_1"
+base_size = 48
+columns = 3
+rows = 3
+background = ExtResource("5_4ol8s")
+avilable_types = Array[String](["WEAPON"])
+metadata/_custom_type_script = "uid://cxxxu558rn2vk"
+
+[node name="EquipmentSlotView2" type="Control" parent="Character"]
+custom_minimum_size = Vector2(64, 64)
+anchors_preset = 0
+offset_left = 16.0
+offset_top = 93.0
+offset_right = 80.0
+offset_bottom = 157.0
+script = ExtResource("4_sfrky")
+slot_name = "demo2_slot_2"
+columns = 2
+rows = 2
+background = ExtResource("5_4ol8s")
+avilable_types = Array[String](["BOOTS"])
+metadata/_custom_type_script = "uid://cxxxu558rn2vk"
+
+[node name="EquipmentSlotView3" type="Control" parent="Character"]
+custom_minimum_size = Vector2(64, 64)
+anchors_preset = 0
+offset_left = 17.0
+offset_top = 167.0
+offset_right = 81.0
+offset_bottom = 231.0
+script = ExtResource("4_sfrky")
+slot_name = "demo2_slot_2"
+columns = 2
+rows = 2
+background = ExtResource("5_4ol8s")
+avilable_types = Array[String](["BOOTS"])
+metadata/_custom_type_script = "uid://cxxxu558rn2vk"
+
+[node name="ItemsControl" type="Control" parent="Character"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 13.0
+offset_top = 255.0
+offset_right = 311.0
+offset_bottom = 319.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Character/ItemsControl"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/separation = 0
+
+[node name="ItemSlotView1" type="Control" parent="Character/ItemsControl/HBoxContainer"]
+material = SubResource("ShaderMaterial_dixdw")
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+script = ExtResource("4_sfrky")
+slot_name = "item_solt_1"
+base_size = 48
+background = ExtResource("7_fplom")
+item_margin = 4
+stack_num_font_size = 10
+stack_num_color = Color(0, 1, 0, 1)
+stack_outline_size = 4
+metadata/_custom_type_script = "uid://cxxxu558rn2vk"
+
+[node name="ItemSlotView2" type="Control" parent="Character/ItemsControl/HBoxContainer"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+script = ExtResource("4_sfrky")
+slot_name = "item_solt_2"
+base_size = 48
+background = ExtResource("7_fplom")
+stack_num_font_size = 16
+stack_num_margin = 4
+stack_outline_size = 1
+metadata/_custom_type_script = "uid://cxxxu558rn2vk"
+
+[node name="ItemSlotView3" type="Control" parent="Character/ItemsControl/HBoxContainer"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+script = ExtResource("4_sfrky")
+slot_name = "item_solt_3"
+base_size = 48
+background = ExtResource("7_fplom")
+stack_num_font_size = 16
+stack_num_margin = 4
+stack_outline_size = 1
+metadata/_custom_type_script = "uid://cxxxu558rn2vk"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+offset_left = 38.0
+offset_top = 96.0
+offset_right = 176.0
+offset_bottom = 267.0
+
+[node name="ButtonToggleInventory" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Toggle Inventory"
+
+[node name="ButtonToggleCharacterInfo" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Toggle Character"
+
+[node name="ButtonAddTestItems" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Add Test Items"
+
+[node name="ButtonSave" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Save Game"
+
+[node name="ButtonLoad" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Load Game"
+
+[node name="ColorRect" type="ColorRect" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 128)
+layout_mode = 2
+
+[node name="DropAreaView" type="Control" parent="VBoxContainer/ColorRect"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_fiolr")
+metadata/_custom_type_script = "uid://c5rou3jm33pbt"
+
+[node name="Label" type="Label" parent="VBoxContainer/ColorRect"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Drop area"
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 569.0
+offset_top = 446.0
+offset_right = 1115.0
+offset_bottom = 495.0
+text = "The two small equipment slots share the same name,
+so they mirror each other."
+
+[node name="Label3" type="Label" parent="."]
+layout_mode = 0
+offset_left = 812.0
+offset_top = 228.0
+offset_right = 1185.0
+offset_bottom = 329.0
+text = "This slot is 3x3, 
+the boots are 2x2, 
+so it looks like there is a margin 
+when equipped."
+
+[node name="Label2" type="Label" parent="."]
+layout_mode = 0
+offset_left = 402.0
+offset_top = 65.0
+offset_right = 861.0
+offset_bottom = 94.0
+text = "Right click to quick equip and unequip"
+
+[connection signal="pressed" from="Inventory/ButtonCloseInventory" to="." method="_on_button_close_inventory_pressed"]
+[connection signal="pressed" from="Character/ButtonCloseStorage" to="." method="_on_button_close_storage_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonToggleInventory" to="." method="_on_button_toggle_inventory_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonToggleCharacterInfo" to="." method="_on_button_toggle_storage_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonAddTestItems" to="." method="_on_button_add_test_items_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonSave" to="." method="_on_button_save_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonLoad" to="." method="_on_button_load_pressed"]

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EquipmentData" load_steps=3 format=3 uid="uid://cd1kc7k3rfudm"]
+
+[ext_resource type="Texture2D" uid="uid://do70l1m84opc3" path="res://mgis_demos/assets/test_item_icons/sword.png" id="1_7oh2r"]
+[ext_resource type="Script" uid="uid://c81d67advvltj" path="res://addons/multi_grid_inventory_system/core/model/item/equipment_data.gd" id="2_rk07g"]
+
+[resource]
+script = ExtResource("2_rk07g")
+item_id = "1002"
+type = "WEAPON"
+item_level = 2
+item_type = 3
+icon = ExtResource("1_7oh2r")
+rows = 3
+metadata/_custom_type_script = "uid://c81d67advvltj"
