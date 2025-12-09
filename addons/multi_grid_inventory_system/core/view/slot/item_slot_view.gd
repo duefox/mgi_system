@@ -145,8 +145,7 @@ func _ready() -> void:
 		return
 
 	# 把自己保存到全局字典
-	if not MGIS.container_dict.has(container_name):
-		MGIS.container_dict.set(container_name, self)
+	MGIS.container_dict.set(container_name, self)
 
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	_init_item_container()

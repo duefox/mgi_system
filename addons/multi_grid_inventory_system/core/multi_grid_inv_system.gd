@@ -130,7 +130,6 @@ var current_container: BaseContainerView
 
 ## 所有背包或者插槽字典数据
 var container_dict: Dictionary[String,Control] = {}
-
 ## 点击物品（购买单个），鼠标左键
 var input_click: String = "inv_click"
 ## 快速移动（售卖），shift+鼠标右键

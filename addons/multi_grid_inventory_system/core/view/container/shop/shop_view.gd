@@ -96,9 +96,7 @@ func _ready() -> void:
 	## 物品所在容器的类型
 	container_type = MGIS.ContainerType.SHOP
 	# 存入字典
-	if not MGIS.container_dict.has(container_name):
-		MGIS.container_dict.set(container_name, self)
-
+	MGIS.container_dict.set(container_name, self)
 	var ret = MGIS.shop_service.regist(container_name, container_columns, activated_rows, container_rows)
 
 	# 使用已注册的信息覆盖View设置

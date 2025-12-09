@@ -132,8 +132,7 @@ func _ready() -> void:
 	# 物品所在容器的类型
 	container_type = MGIS.ContainerType.INVENTORY
 	# 存入字典
-	if not MGIS.container_dict.has(container_name):
-		MGIS.container_dict.set(container_name, self)
+	MGIS.container_dict.set(container_name, self)
 	# 注冊背包
 	var ret = MGIS.inventory_service.regist(container_name, container_columns, container_rows, activated_rows, avilable_types)
 

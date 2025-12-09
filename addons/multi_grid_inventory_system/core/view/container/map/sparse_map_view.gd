@@ -46,9 +46,9 @@ var _current_mouse_grid: Vector2i = -Vector2i.ONE
 var _current_hover_view: ItemView = null
 ## 交互相关变量
 const INTERACT_INTERVAL: float = 0.4  # 交互间隔 (例如每0.4秒挥动一次稿子)
-var _is_interacting: bool = false     # 是否正在按住交互键
-var _target_interact_view: ItemView = null # 当前交互的目标 View
-var _has_triggered_interaction: bool = false # 本次按压是否已经触发过交互(用于区分短按详情)
+var _is_interacting: bool = false  # 是否正在按住交互键
+var _target_interact_view: ItemView = null  # 当前交互的目标 View
+var _has_triggered_interaction: bool = false  # 本次按压是否已经触发过交互(用于区分短按详情)
 
 
 func _ready() -> void:
@@ -63,10 +63,8 @@ func _ready() -> void:
 	# 使用自定义的容器类型，或者复用 INVENTORY，取决于你的 MGIS 枚举定义
 	# 建议在 MGIS.ContainerType 中增加 MAP 类型，或者暂用 INVENTORY
 	container_type = MGIS.ContainerType.INVENTORY
-
-	if not MGIS.container_dict.has(container_name):
-		MGIS.container_dict.set(container_name, self)
-
+	# 容器存入字典
+	MGIS.container_dict.set(container_name, self)
 	# 注册容器 (注意：activated_rows 在这里通常等于 map_height)
 	var service = MGIS.inventory_service
 	var ret = service.regist(container_name, map_width, map_height, map_height, avilable_types)
@@ -113,7 +111,7 @@ func _on_interact_tick() -> void:
 	if is_instance_valid(_target_interact_view):
 		# 标记：已经触发过交互了 (这样松开鼠标时就不会弹出详情窗口)
 		_has_triggered_interaction = true
-		
+
 		# 发送交互信号 (外部逻辑连接此信号来扣除耐久、播放特效等)
 		MGIS.sig_grid_interact_pressed.emit(container_name, _target_interact_view.first_grid, _target_interact_view)
 		#print("SparseMap: Mining... ", _target_interact_view)
@@ -251,6 +249,7 @@ func _handle_item_hover(grid_pos: Vector2i) -> void:
 		if _current_hover_view:
 			MGIS.sig_show_item_range.emit(container_name, _current_hover_view)
 
+
 ## 左键按下
 func _handle_left_click_pressed() -> void:
 	# 场景 A: 放置物品 (保持不变)
@@ -279,8 +278,8 @@ func _handle_left_click_pressed() -> void:
 			# [核心修改] 不可拖拽 -> 启动持续交互
 			_is_interacting = true
 			_target_interact_view = item_view
-			_has_triggered_interaction = false 
-			
+			_has_triggered_interaction = false
+
 			# 可选：按下瞬间是否立即触发一次？
 			# 如果想立即触发，可以在这里调用一次 _on_interact_tick()
 			# 如果想有前摇（按住一会儿才开始），则交给 _physics_process
@@ -292,10 +291,10 @@ func _handle_left_click_pressed() -> void:
 func _handle_left_click_released() -> void:
 	if not _is_interacting:
 		return
-	
+
 	# 停止交互
 	_stop_interaction()
-	
+
 	# [逻辑判断] 短按 vs 长按
 	# 如果 _has_triggered_interaction 为 false，说明按下的时间很短，throttle 一次都没触发
 	# 此时视为玩家只是想“点击查看详情”
@@ -303,7 +302,7 @@ func _handle_left_click_released() -> void:
 		# 这里需要再次确认目标是否有效（虽然 _stop_interaction 清空了变量，但在清空前应该缓存一下，或者利用之前的状态）
 		# 由于 _stop_interaction 已经清空了 _target_interact_view，我们需要在 _handle_left_click_released 开头获取它
 		# 但更简单的做法是：不用 _target_interact_view，而是重新获取鼠标下的格子，或者修改流程。
-		
+
 		# 修正后的逻辑：重新获取鼠标下的物品来显示详情
 		var click_grid = get_grid_under_mouse()
 		var item_view = find_item_view_by_grid(click_grid)
@@ -393,6 +392,7 @@ func _clear_highlight() -> void:
 
 
 # --- 辅助函数 ---
+
 
 ## 更新容器大小
 func _update_min_size() -> void:
