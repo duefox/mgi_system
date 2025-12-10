@@ -6,7 +6,7 @@ class_name MovingItemService
 var moving_item: BaseItemData
 ## 正在移动的物品View
 var moving_item_view: ItemView
-## 正在移动的物品的偏移（例：一个2*2的物品，点击左上角移动时，偏移是[0,0]，点击右下角移动时，偏移是[1,1]）
+## 正在移动的物品的偏移
 var moving_item_offset: Vector2i = Vector2i.ZERO
 ## 丢弃物品检测区域
 var drop_area_view: DropAreaView
@@ -34,7 +34,9 @@ func clear_moving_item() -> void:
 		drop_area_view.hide()
 
 
+## 纯粹的数据移动 (底层函数，不发送 Pickup 信号，防止与旋转混淆)
 func move_item_by_data(item_data: BaseItemData, offset: Vector2i, base_size: int) -> void:
+	# 强制中心对齐逻辑
 	offset = Vector2i.ZERO
 	self.moving_item = item_data
 	self.moving_item_offset = offset
@@ -45,6 +47,7 @@ func move_item_by_data(item_data: BaseItemData, offset: Vector2i, base_size: int
 		drop_area_view.show()
 
 
+## [修改] 从网格拿起物品
 func move_item_by_grid(inv_name: String, grid_id: Vector2i, offset: Vector2i, base_size: int) -> void:
 	if moving_item:
 		push_error("Already had moving item.")
@@ -56,54 +59,53 @@ func move_item_by_grid(inv_name: String, grid_id: Vector2i, offset: Vector2i, ba
 		if drop_area_view:
 			drop_area_view.show()
 
+		# [新增] 发送拿起信号
+		MGIS.sig_item_picked_up.emit(item_data)
 
-## 旋转拖拽物品
+
+## [修改] 旋转拖拽物品
 func rotate_item(inv_name: String, base_size: int) -> void:
 	if not is_instance_valid(moving_item):
 		return
-	# [核心修改]
 	# 1. 改变数据朝向
 	if moving_item.orientation == BaseItemData.ORI.VER:
 		moving_item.orientation = BaseItemData.ORI.HOR
 	elif moving_item.orientation == BaseItemData.ORI.HOR:
 		moving_item.orientation = BaseItemData.ORI.VER
 
-	# 2. 重建 View (保持不变)
+	# 2. 重建 View
 	moving_item_view.queue_free()
 	# offset 传 0 即可
 	move_item_by_data(moving_item, Vector2i.ZERO, base_size)
-	
-	
+
+	# [新增] 发送旋转信号
+	MGIS.sig_item_rotated.emit(moving_item)
+
 
 ## 同步拖拽物品的样式（大小、字体等）以匹配目标容器
 func sync_style_with_container(container_view: Control) -> void:
 	if not is_instance_valid(moving_item_view):
 		return
-		
-	# 1. 性能优化：只有当基础大小或缩放不一致时才执行更新
-	# 注意：浮点数比较 scale 最好用 is_equal_approx，但这里直接比较通常也够用
-	if moving_item_view.base_size == container_view.base_size and moving_item_view.scale == container_view.scale:
-		return
 
-	# 2. 同步基础属性
-	moving_item_view.base_size = container_view.base_size
+	if "base_size" in container_view:
+		if moving_item_view.base_size == container_view.base_size and moving_item_view.scale == container_view.scale:
+			pass  # 属性一致，跳过
+
+	if "base_size" in container_view:
+		moving_item_view.base_size = container_view.base_size
+
 	moving_item_view.scale = container_view.scale
-	
-	# 3. 同步堆叠数字样式 (防止小格子出现巨大的数字)
-	moving_item_view.stack_num_color = container_view.stack_num_color
-	moving_item_view.stack_num_font = container_view.stack_num_font
-	moving_item_view.stack_num_font_size = container_view.stack_num_font_size
-	moving_item_view.stack_num_margin = container_view.stack_num_margin
-	moving_item_view.stack_outline_size = container_view.stack_outline_size
-	moving_item_view.stack_outline_color = container_view.stack_outline_color
-	
-	# 4. 同步边框样式 (如果有需要)
-	# MGIS 的常量通常是全局的，但如果容器有自定义样式，这里也要同步
+
+	if "stack_num_color" in container_view:
+		moving_item_view.stack_num_color = container_view.stack_num_color
+		moving_item_view.stack_num_font = container_view.stack_num_font
+		moving_item_view.stack_num_font_size = container_view.stack_num_font_size
+		moving_item_view.stack_num_margin = container_view.stack_num_margin
+		moving_item_view.stack_outline_size = container_view.stack_outline_size
+		moving_item_view.stack_outline_color = container_view.stack_outline_color
+
 	moving_item_view.border_width = MGIS.BORDER_WIDTH
 	moving_item_view.corner_radius = MGIS.CORNER_RADIUS
 	moving_item_view.border_color = MGIS.BORDER_COLOR
-	
-	# 5. 强制更新
-	# base_size 的 setter 只有 call_deferred，为了保证拖拽手感（下一帧 _process 计算位置时用到新尺寸），
-	# 这里虽然不需要手动调用 recalculate，但在视觉上确保万无一失
+
 	moving_item_view.queue_redraw()

@@ -92,6 +92,16 @@ signal sig_proxy_save(save_data: Variant, inv_name: String, request_id: int)
 ## 代理加载
 @warning_ignore("unused_signal")
 signal sig_proxy_load(inv_name: String, request_id: int)
+## 交易/操作失败
+signal sig_transaction_failed(info: Dictionary)
+## 通用播放请求
+signal sig_play_sound(sound_name: String)
+## 拿起物品
+signal sig_item_picked_up(item: BaseItemData)
+## 旋转物品
+signal sig_item_rotated(item: BaseItemData)
+## 丢弃物品
+signal sig_item_dropped(item: BaseItemData)
 
 ## 背包业务类全局引用，如有需要可以使用，不要自己new
 var inventory_service: InventoryService = InventoryService.new()

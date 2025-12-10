@@ -42,13 +42,18 @@ func stack_moving_item(container_view: BaseContainerView, grid_id: Vector2i) -> 
 		MGIS.sig_inv_item_updated.emit(inv_name, grid_id)
 
 
-## 放置物品
+## [修改] 尝试放置正在移动的物品到这个格子
 func place_moving_item(container_view: BaseContainerView, grid_id: Vector2i) -> bool:
 	var inv_name: String = container_view.container_name
-	# 直接使用 grid_id
+
+	# 使用计算好的 grid_id 直接放置
 	if place_to(inv_name, MGIS.moving_item_service.moving_item, grid_id, container_view.is_slot):
 		MGIS.moving_item_service.clear_moving_item()
+		# 成功时，base_container_service 会自动发送 sig_inv_item_added，AudioManager 可以监听那个作为放置音效
 		return true
+
+	# [新增] 放置失败，发送信号 (播放错误音效)
+	MGIS.sig_transaction_failed.emit({"msg": "Cannot place item here"})
 	return false
 
 
@@ -89,61 +94,52 @@ func place_single_from_moving(container_view: BaseContainerView, grid_id: Vector
 	return false
 
 
-## 尝试从格子上回收一个堆叠物品到手中 (连续回收用)
-## @return bool: 是否成功回收
+## [修改] 尝试从格子上回收一个堆叠物品到手中
 func pickup_single_to_moving(container_view: BaseContainerView, grid_id: Vector2i) -> bool:
 	var inv_name = container_view.container_name
-	# 1. 获取格子上的物品
 	var item_on_grid = find_item_data_by_grid(inv_name, grid_id)
 	if not item_on_grid:
 		return false
-
-	# 仅处理 StackableData，非堆叠物品通常需要点击一次拿起来，不适合连续“吸取”
 	if not item_on_grid is StackableData:
 		return false
 
 	var moving_service = MGIS.moving_item_service
 
-	# 2. 如果手里是空的 -> 拿起一个
+	# 场景 A: 手里是空的 -> 拿起一个
 	if not moving_service.moving_item:
-		# 拆分一个出来
 		var single_item = item_on_grid.duplicate(true)
 		single_item.current_amount = 1
-
-		# 扣除格子上的数量
 		item_on_grid.current_amount -= 1
 
-		# 设置为手中物品
 		moving_service.move_item_by_data(single_item, Vector2i.ZERO, container_view.base_size)
 
-		# 如果格子空了，移除
 		if item_on_grid.current_amount <= 0:
 			remove_item_by_data(inv_name, item_on_grid)
 		else:
 			MGIS.sig_inv_item_updated.emit(inv_name, grid_id)
 
+		# [新增] 发送拿起信号
+		MGIS.sig_item_picked_up.emit(single_item)
 		return true
 
-	# 3. 如果手里有物品 -> 尝试合并
+	# 场景 B: 手里有物品 -> 合并 (吸取)
 	else:
 		var moving_item = moving_service.moving_item
-		# 必须是同类且可堆叠
 		if moving_item.item_id == item_on_grid.item_id and moving_item is StackableData:
-			# 手里没满
 			if not moving_item.is_full():
 				moving_item.current_amount += 1
 				item_on_grid.current_amount -= 1
 
-				# 刷新手中视图
 				if moving_service.moving_item_view:
 					moving_service.moving_item_view.update_stack_label()
 
-				# 处理格子物品
 				if item_on_grid.current_amount <= 0:
 					remove_item_by_data(inv_name, item_on_grid)
 				else:
 					MGIS.sig_inv_item_updated.emit(inv_name, grid_id)
 
+				# [新增] 吸取也视为拿起，发送信号 (可以播放高音调的 pickup)
+				MGIS.sig_item_picked_up.emit(moving_item)
 				return true
 
 	return false

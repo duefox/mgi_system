@@ -141,7 +141,7 @@ func use_item(slot_name: String) -> bool:
 	return true
 
 
-## 移动正在装备的物品，成功后发射信号 sig_slot_item_unequipped
+## 移动正在装备的物品
 func move_item(slot_name: String, base_size: int) -> void:
 	if MGIS.moving_item_service.moving_item:
 		push_error("Already had moving item.")
@@ -151,6 +151,9 @@ func move_item(slot_name: String, base_size: int) -> void:
 		if _item_slot_repository.get_slot(slot_name).unequip():
 			MGIS.moving_item_service.move_item_by_data(item_data, Vector2i.ZERO, base_size)
 			MGIS.sig_slot_item_unequipped.emit(slot_name, item_data)
+
+			# [新增] 发送拿起信号
+			MGIS.sig_item_picked_up.emit(item_data)
 
 
 ## 更新网格的tooltip文本

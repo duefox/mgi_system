@@ -2,6 +2,13 @@ extends Resource
 ## 物品数据基类，所有物品的基类
 class_name BaseItemData
 
+## 物品放置层
+enum LayerType {
+	GROUND,  # 地板、路面 (渲染到 Layer 1)
+	FURNITURE,  # 家具、机器、墙壁 (渲染到 Layer 2)
+	WALL,  # 如果墙壁需要特殊处理
+}
+
 ## 物品类型
 enum ItemType {
 	ANIMAL,  # 动物
@@ -59,6 +66,8 @@ enum BodySize { SMALL, MIDDLE, BIG }
 ## 物品插槽类型，值为“ANY”表示所有类型
 ## 这个字段用来匹配是否能装备物品，不用枚举是让装备可以用字符串区分如：消耗品，项链，头，胸，足等方便扩展
 @export var type: String = "ANY"
+## 放置层级（默认都是家具，墙壁和地板需要放置到GROUND）
+@export var layer_type: LayerType = LayerType.FURNITURE
 ## 物品级别
 @export var item_level: ItemLevel = ItemLevel.BASIC
 ## 物品类型

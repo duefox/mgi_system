@@ -3,7 +3,9 @@ extends BaseContainerView
 class_name SparseMapView
 
 ## 稀疏地图视图
-## 特点：不生成格子节点，仅渲染存在的物品，背景和高亮通过 _draw 绘制
+## 特点：不生成格子节点，仅渲染存在的物品，背景和高亮通过 _draw 绘制。
+## 实现了普通模式(交互/详情)和建造模式(搬运/铺设/回收)的逻辑分流。
+## [架构更新] 移除自身输入处理，改为由 GameMap 统一分发 (proxy_input)
 
 ## 允许存放的物品类型
 @export var avilable_types: Array[String] = ["ANY"]
@@ -60,9 +62,9 @@ var _current_hover_view: ItemView = null
 const INTERACT_INTERVAL: float = 0.2
 # 交互状态标志位：0=无, 1=左键交互(采集/铺设), 2=右键交互(回收)
 var _interacting_state: int = 0
-var _target_interact_view: ItemView = null
+var _target_interact_view: ItemView = null  # 记录按下的目标 View
 var _has_triggered_interaction: bool = false  # 本次按压是否已经触发过交互
-var _last_grid_pos: Vector2i = -Vector2i.ONE  # 记录拖拽轨迹(铺设/回收)，防止单帧重复
+var _last_grid_pos: Vector2i = -Vector2i.ONE  # 记录拖拽轨迹，防止单帧重复操作
 
 
 func _ready() -> void:
@@ -98,10 +100,8 @@ func _ready() -> void:
 	MGIS.sig_inv_item_updated.connect(_on_inv_item_updated)
 	MGIS.sig_inv_refresh.connect(refresh)
 
-	# 鼠标移出地图区域时清理状态
-	mouse_exited.connect(_on_mouse_exited_control)
-
-	mouse_filter = Control.MOUSE_FILTER_PASS
+	# [核心修改] 设置为忽略鼠标事件，完全由 GameMap 代理输入
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	call_deferred("refresh")
 
@@ -111,21 +111,22 @@ func _physics_process(_delta: float) -> void:
 	if _interacting_state == 0:
 		return
 
-	# 普通模式：长按采集
+	# 普通模式：左键长按采集
 	if not is_build_mode and _interacting_state == 1 and is_instance_valid(_target_interact_view):
-		MGIS.throttle("sparse_map_interact", INTERACT_INTERVAL, _on_interact_tick)
+		MGIS.throttle("sparse_map_interact_" + container_name, INTERACT_INTERVAL, _on_interact_tick)
 
-	# 建造模式：右键持续回收 (原地按住)
+	# 建造模式：右键按住回收 (原地按住)
 	elif is_build_mode and _interacting_state == 2:
 		var current_grid = get_target_grid_from_mouse()
 		# 节流执行回收
-		MGIS.throttle("sparse_map_reclaim", 0.15, func(): _try_reclaim_continuous(current_grid))
+		MGIS.throttle("sparse_map_reclaim_" + container_name, 0.15, func(): _try_reclaim_continuous(current_grid))
 
 
 ## 普通模式的采集回调
 func _on_interact_tick() -> void:
 	if is_instance_valid(_target_interact_view):
 		_has_triggered_interaction = true
+		# 发送交互信号 (例如采矿)
 		MGIS.sig_grid_interact_pressed.emit(container_name, _target_interact_view.first_grid, _target_interact_view)
 
 
@@ -135,16 +136,16 @@ func _stop_interaction() -> void:
 	_last_grid_pos = -Vector2i.ONE
 
 
-# --- 核心：交互逻辑分发 ---
+# --- 核心：外部输入代理 ---
 
 
-func _gui_input(event: InputEvent) -> void:
+## [核心接口] 由 GameMap 调用此函数来传递输入事件
+func proxy_input(event: InputEvent) -> void:
 	# 1. 鼠标移动
 	if event is InputEventMouseMotion:
 		_handle_mouse_motion()
 
 	# 2. 鼠标点击
-	# 使用本地映射配置的 inv_click (左键) 和 inv_use (右键)
 	if event.is_action_pressed("inv_click"):
 		_handle_left_press()
 	elif event.is_action_released("inv_click"):
@@ -155,31 +156,51 @@ func _gui_input(event: InputEvent) -> void:
 		_handle_right_release()
 
 
+## [核心接口] 外部清理状态 (当 GameMap 切换层级或鼠标移出时调用)
+func clear_hover_state() -> void:
+	# 清除网格高亮
+	grid_lose_hover(_current_mouse_grid)
+	_current_mouse_grid = -Vector2i.ONE
+	_last_grid_pos = -Vector2i.ONE
+
+	# 清除物品范围显示
+	if _current_hover_view:
+		MGIS.sig_hide_item_range.emit(container_name, _current_hover_view)
+		_current_hover_view = null
+
+	# 停止交互
+	if _interacting_state != 0:
+		_stop_interaction()
+
+	# 清除高亮绘制
+	_clear_highlight()
+
+
 # --- 逻辑分支实现 ---
 
 
 ## 处理鼠标移动
 func _handle_mouse_motion() -> void:
-	var current_grid = get_grid_under_mouse()
+	# 1. 计算放置/高亮的吸附目标 (Top-Left)
+	var target_grid = get_target_grid_from_mouse()
 
-	# A. 基础高亮与范围显示 (通用)
-	if current_grid != _current_mouse_grid:
+	if target_grid != _current_mouse_grid:
 		grid_lose_hover(_current_mouse_grid)
-		_current_mouse_grid = current_grid
-		MGIS.mouse_cell_id = current_grid
+		_current_mouse_grid = target_grid
 
-		if _is_valid_grid(current_grid):
-			grid_hover(current_grid)
+		MGIS.mouse_cell_id = target_grid
+
+		if _is_valid_grid(target_grid):
+			grid_hover(target_grid)
 		else:
 			_clear_highlight()
 
-	_handle_item_hover(current_grid)
+	# 2. 计算鼠标正下方的原始格子 (用于详情/范围)
+	var raw_mouse_grid = get_grid_under_mouse()
+	_handle_item_hover(raw_mouse_grid)
 
-	# B. [建造模式] 拖拽连续操作
+	# 3. [建造模式] 拖拽连续操作
 	if is_build_mode:
-		var target_grid = get_target_grid_from_mouse()
-
-		# 只有格子变了才触发，防止单帧重复
 		if target_grid != _last_grid_pos:
 			# 左键拖拽铺设
 			if _interacting_state == 1 and MGIS.moving_item_service.moving_item:
@@ -211,7 +232,7 @@ func _handle_left_release() -> void:
 func _handle_right_press() -> void:
 	if is_build_mode:
 		# [建造模式] 启动连续回收
-		_interacting_state = 2  # 标记为右键交互
+		_interacting_state = 2
 		_last_grid_pos = -Vector2i.ONE
 		_try_reclaim_continuous(get_target_grid_from_mouse())
 	else:
@@ -247,7 +268,10 @@ func _handle_build_mode_left_press() -> void:
 		if item_view.data.can_drag:
 			MGIS.item_focus_service.item_lose_focus(item_view)
 			MGIS.moving_item_service.move_item_by_grid(container_name, click_grid, Vector2i.ZERO, base_size)
-			grid_hover(click_grid)
+
+			# 拾取后立即进入放置预览状态
+			var target_grid = get_target_grid_from_mouse()
+			grid_hover(target_grid)
 			_clear_hover_status(item_view)
 
 
@@ -268,11 +292,9 @@ func _handle_normal_mode_left_release() -> void:
 	if _interacting_state != 1:
 		return
 
-	# 缓存目标
 	var target = _target_interact_view
 	_stop_interaction()
 
-	# 如果没触发过采集，则是短按 -> 详情
 	if not _has_triggered_interaction and is_instance_valid(target):
 		MGIS.sig_show_item_detail.emit(container_name, target.first_grid, target)
 
@@ -282,10 +304,16 @@ func _handle_normal_mode_left_release() -> void:
 
 ## 连续放置
 func _try_place_continuous(grid: Vector2i) -> void:
+	# [修改] 放置前先检查冲突
+	# 稀疏地图中，如果目标区域已被占用，禁止放置（不触发 Service 层的堆叠逻辑）
+	if _has_collision(grid):
+		return
+
+	# 执行放置
 	if MGIS.inventory_service.place_single_from_moving(self, grid):
 		_last_grid_pos = grid
 		_clear_highlight()
-		grid_hover(grid)
+		grid_hover(grid)  # 放置后刷新高亮(变红)
 
 
 ## 连续回收
@@ -315,19 +343,6 @@ func _handle_item_hover(grid_pos: Vector2i) -> void:
 			MGIS.sig_show_item_range.emit(container_name, _current_hover_view)
 
 
-func _on_mouse_exited_control() -> void:
-	grid_lose_hover(_current_mouse_grid)
-	_current_mouse_grid = -Vector2i.ONE
-	_last_grid_pos = -Vector2i.ONE
-
-	if _current_hover_view:
-		MGIS.sig_hide_item_range.emit(container_name, _current_hover_view)
-		_current_hover_view = null
-
-	if _interacting_state != 0:
-		_stop_interaction()
-
-
 # --- 核心：坐标转换 ---
 
 
@@ -335,12 +350,10 @@ func get_target_grid_from_mouse() -> Vector2i:
 	var moving_item = MGIS.moving_item_service.moving_item
 	if not moving_item:
 		return get_grid_under_mouse()
-
 	var local_mouse_pos = get_local_mouse_position()
 	var item_shape = moving_item.get_shape(is_slot)
 	var item_pixel_size = Vector2(item_shape) * float(base_size)
 	var raw_top_left_px = local_mouse_pos - (item_pixel_size / 2.0)
-
 	var target_x = round(raw_top_left_px.x / base_size)
 	var target_y = round(raw_top_left_px.y / base_size)
 	return Vector2i(int(target_x), int(target_y))
@@ -406,6 +419,29 @@ func _is_valid_grid(grid: Vector2i) -> bool:
 	return grid.x >= 0 and grid.x < container_columns and grid.y >= 0 and grid.y < container_rows
 
 
+## [新增] 冲突检测辅助函数
+## 检查当前拖拽物品覆盖的区域是否已被占用
+func _has_collision(start_grid: Vector2i) -> bool:
+	if not MGIS.moving_item_service.moving_item:
+		return false
+
+	var moving_item = MGIS.moving_item_service.moving_item
+	var item_shape = moving_item.get_shape(is_slot)
+	var grids = _get_grids_by_shape_sparse(start_grid, item_shape)
+
+	# 1. 检查越界
+	if grids.size() != item_shape.x * item_shape.y:
+		return true
+
+	# 2. 检查占用
+	var inv_data = MGIS.inventory_service.get_container(container_name)
+	for grid in grids:
+		if inv_data.find_item_data_by_grid(grid):
+			return true  # 只要有东西就视为冲突 (不堆叠)
+
+	return false
+
+
 # --- 重写 BaseContainerView 的高亮逻辑 ---
 
 
@@ -417,27 +453,29 @@ func grid_hover(grid_id: Vector2i) -> void:
 
 	MGIS.moving_item_service.sync_style_with_container(self)
 
-	var start_grid = get_target_grid_from_mouse()
+	# grid_id 已经是由 proxy_input 算好的 target_grid，无需再次计算吸附
+	var start_grid = grid_id
+
 	var moving_item = MGIS.moving_item_service.moving_item
 	var item_shape = moving_item.get_shape(is_slot)
 
 	var grids = _get_grids_by_shape_sparse(start_grid, item_shape)
 	_highlight_grids = grids
 
+	# 冲突检测
 	var has_conflict = false
+	# 1. 越界检查
 	if grids.size() != item_shape.x * item_shape.y:
 		has_conflict = true
 	else:
+		# 2. 占用检查
 		var inv_data = MGIS.inventory_service.get_container(container_name)
 		for grid in grids:
 			var item_in_grid = inv_data.find_item_data_by_grid(grid)
 			if item_in_grid:
-				# 堆叠检查：同ID且未满 -> 允许
-				if item_in_grid is StackableData and item_in_grid.item_id == moving_item.item_id and not item_in_grid.is_full():
-					pass
-				else:
-					has_conflict = true
-					break
+				# 稀疏地图中，任何占用都视为冲突 (禁止堆叠)
+				has_conflict = true
+				break
 
 	_highlight_state = BaseGridView.State.CONFLICT if has_conflict else BaseGridView.State.AVILABLE
 	queue_redraw()
