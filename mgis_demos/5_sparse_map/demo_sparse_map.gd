@@ -1,15 +1,19 @@
 extends Control
 
 @onready var map_view: SparseMapView = %MapView
+@onready var map_boot_view: MapView = %MapBootView
+@onready var toggle_build_mode: Button = %ToggleBuildMode
+@onready var game_map: GameMap = $SparseMap/ScrollContainer/GameMap
 
 var _show_grid_lines: bool = true
+var _is_build_mode: bool = false
 
 
 func _ready() -> void:
 	MGIS.sig_show_item_detail.connect(_on_show_item_detail)
 	MGIS.sig_grid_interact_pressed.connect(_on_grid_interact_pressed)
-	#MGIS.sig_show_item_range.connect(_on_show_item_range)
-	#MGIS.sig_hide_item_range.connect(_on_hide_item_range)
+	MGIS.sig_show_item_range.connect(_on_show_item_range)
+	MGIS.sig_hide_item_range.connect(_on_hide_item_range)
 	MGIS.sig_enter_item.connect(_on_enter_item)
 
 
@@ -60,14 +64,27 @@ func _on_btn_add_items_pressed() -> void:
 
 func _on_btn_save_pressed() -> void:
 	MGIS.save("demo5_slot_inventory", false)
+	MGIS.save("demo5_boot_map", false)
 	MGIS.save("demo5_map", false)
 
 
 func _on_btn_load_pressed() -> void:
 	MGIS.load("demo5_slot_inventory")
+	MGIS.load("demo5_boot_map")
 	MGIS.load("demo5_map")
 
 
 func _on_btn_toggle_map_grid_pressed() -> void:
 	_show_grid_lines = not _show_grid_lines
 	map_view.show_grid_lines = _show_grid_lines
+
+
+func _on_toggle_build_mode_pressed() -> void:
+	_is_build_mode = not _is_build_mode
+	#map_view.is_build_mode = _is_build_mode
+	#map_boot_view.is_build_mode = _is_build_mode
+	game_map.set_build_mode(_is_build_mode)
+	if _is_build_mode:
+		toggle_build_mode.text = "Build mode on"
+	else:
+		toggle_build_mode.text = "Build mode off"

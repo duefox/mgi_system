@@ -164,12 +164,14 @@ func get_grid_map() -> Dictionary[Vector2i, BaseGridView]:
 
 ## 刷新背包显示
 func refresh() -> void:
-	#print(name, "->refresh")
 	_clear_inv()
 	var inv_data = MGIS.inventory_service.get_container(container_name)
-	var handled_item: Dictionary[BaseItemData, ItemView]
+	# [安全检查] 确保数据存在
+	if not inv_data:
+		return
+	var handled_item: Dictionary[BaseItemData, ItemView] = {}
 	for grid in _grid_map.keys():
-		var item_data = inv_data.grid_item_map[grid]
+		var item_data = inv_data.grid_item_map.get(grid)
 		if item_data and not handled_item.has(item_data):
 			var grids = inv_data.item_grids_map[item_data]
 			var item = _draw_item(item_data, grids[0])
@@ -177,14 +179,17 @@ func refresh() -> void:
 			_items.append(item)
 			_item_grids_map[item] = grids
 			for g in grids:
-				_grid_map[g].taken(g - grids[0])
-				_grid_item_map[g] = item
+				# 确保格子存在
+				if _grid_map.has(g):
+					_grid_map[g].taken(g - grids[0])
+					_grid_item_map[g] = item
+			# 初始化加载物品时，手动更新一次 Tooltip
+			update_tooltip(container_name, item_data.tooltips, grids)
 			continue
 		elif item_data:
 			_grid_item_map[grid] = handled_item[item_data]
 		else:
 			_grid_item_map[grid] = null
-	pass
 
 
 ## 通过格子ID获取物品视图

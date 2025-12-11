@@ -67,7 +67,7 @@ func _on_button_add_test_items_pressed() -> void:
 
 
 func _on_button_save_pressed() -> void:
-	MGIS.save("demo2_inventory")
+	MGIS.save("demo2_inventory", true)
 
 
 func _on_button_load_pressed() -> void:

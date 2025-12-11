@@ -30,3 +30,5 @@ func _gui_input(event: InputEvent) -> void:
 		if MGIS.has_moving_item() and MGIS.moving_item_service.moving_item.can_drop():
 			MGIS.moving_item_service.moving_item.drop()
 			MGIS.moving_item_service.clear_moving_item()
+			# 发送丢弃物品信号
+			MGIS.sig_item_dropped.emit(MGIS.moving_item_service.moving_item)

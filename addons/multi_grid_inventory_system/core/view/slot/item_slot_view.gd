@@ -128,6 +128,7 @@ func refresh() -> void:
 		var item_data: BaseItemData = slot_data.equipped_item
 		if item_data:
 			_on_item_equipped(slot_name, item_data)
+			update_tooltip(slot_name, item_data.tooltips)
 
 
 ## 初始化
@@ -162,22 +163,22 @@ func _ready() -> void:
 func _on_slot_hover() -> void:
 	if not MGIS.moving_item_service.moving_item:
 		return
-		
+
 	var moving_view = MGIS.moving_item_service.moving_item_view
-	
+
 	# 1. 同步样式
-	MGIS.moving_item_service.sync_style_with_container(self) # 假设 ItemSlotView 也有 base_size 等属性
-	
+	MGIS.moving_item_service.sync_style_with_container(self)  # 假设 ItemSlotView 也有 base_size 等属性
+
 	# 2. 限制大小 (适配插槽的行列数)
 	# 装备槽有自己的 columns 和 rows，物品必须缩放进去
 	moving_view.limit_width = float(columns)
 	moving_view.limit_height = float(rows)
 	moving_view.recalculate_size()
-	
+
 	# 3. 网格高亮
 	var slot_data = MGIS.item_slot_service.get_slot(slot_name)
 	var is_avilable = slot_data.is_item_avilable(MGIS.moving_item_service.moving_item)
-	
+
 	_state = State.AVILABLE if is_avilable and is_empty() else State.INVILABLE
 	queue_redraw()
 
@@ -191,7 +192,7 @@ func _on_slot_lose_hover() -> void:
 			moving_view.limit_width = 0.0
 			moving_view.limit_height = 0.0
 			moving_view.recalculate_size()
-			
+
 	_state = State.NORMAL
 	queue_redraw()
 
@@ -208,13 +209,11 @@ func _on_item_equipped(slot_name: String, item_data: BaseItemData):
 		_state = State.NORMAL
 		# 堆叠物品则更新堆叠数据
 		if item_data is StackableData:
-			print("before->current_amount:",item_data.current_amount)
 			_item_view.update_stack_label(item_data)
 	# 非空
 	else:
 		# 堆叠物品则更新堆叠数据
 		if item_data is StackableData:
-			print("after->current_amount:",item_data.current_amount)
 			_item_view.update_stack_label(item_data)
 	## 更新提示文本
 	update_tooltip(slot_name, item_data.tooltips)

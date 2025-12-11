@@ -227,7 +227,7 @@ func get_root() -> Node:
 ## @param head_pos:是否放入背包的指定位置
 func add_item(inv_name: String, item_data: BaseItemData, need_duplicate: bool = true, is_slot: bool = false, head_pos: Vector2i = -Vector2i.ONE) -> bool:
 	#print("add_item->inv_name:", inv_name)
-	# 更新提示
+	# 自动格式化tooltip提示文本为bbcode
 	item_data.formatter_tooltip()
 	return inventory_service.add_item(inv_name, item_data, need_duplicate, is_slot, head_pos)
 

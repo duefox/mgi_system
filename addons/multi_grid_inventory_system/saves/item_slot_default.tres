@@ -1,0 +1,104 @@
+[gd_resource type="Resource" script_class="ItemSlotRepository" load_steps=21 format=3]
+
+[ext_resource type="Script" path="res://addons/multi_grid_inventory_system/core/model/slot/item_slot_data.gd" id="1_hg3ko"]
+[ext_resource type="Texture2D" path="res://mgis_demos/assets/test_item_icons/sword.png" id="2_eqsyf"]
+[ext_resource type="Script" path="res://addons/multi_grid_inventory_system/core/model/item/equipment_data.gd" id="3_isn5n"]
+[ext_resource type="Script" path="res://addons/multi_grid_inventory_system/core/repository/item_slot_repository.gd" id="4_d7m8m"]
+[ext_resource type="Texture2D" path="res://mgis_demos/assets/test_item_icons/boots.png" id="4_i083t"]
+[ext_resource type="Texture2D" path="res://mgis_demos/assets/test_item_icons/armor.png" id="5_rcg03"]
+[ext_resource type="Texture2D" path="res://mgis_demos/assets/test_item_icons/bottle.png" id="6_po3mx"]
+[ext_resource type="Script" path="res://addons/multi_grid_inventory_system/core/model/item/consumable_data.gd" id="7_0tnlu"]
+[ext_resource type="Texture2D" path="res://mgis_demos/assets/test_item_icons/jewel.png" id="8_ea0ju"]
+[ext_resource type="Script" path="res://addons/multi_grid_inventory_system/core/model/item/stackable_data.gd" id="9_w8sdd"]
+
+[sub_resource type="Resource" id="Resource_i083t"]
+script = ExtResource("3_isn5n")
+item_id = "1002"
+type = "WEAPON"
+item_level = 2
+item_type = 3
+icon = ExtResource("2_eqsyf")
+rows = 3
+metadata/_custom_type_script = "uid://c81d67advvltj"
+
+[sub_resource type="Resource" id="Resource_rcg03"]
+script = ExtResource("1_hg3ko")
+equipped_item = SubResource("Resource_i083t")
+avilable_types = Array[String](["WEAPON"])
+slot_name = "demo2_slot_1"
+
+[sub_resource type="Resource" id="Resource_po3mx"]
+script = ExtResource("3_isn5n")
+item_id = "1000"
+type = "BOOTS"
+item_type = 3
+icon = ExtResource("4_i083t")
+columns = 2
+rows = 2
+metadata/_custom_type_script = "uid://c81d67advvltj"
+
+[sub_resource type="Resource" id="Resource_0tnlu"]
+script = ExtResource("1_hg3ko")
+equipped_item = SubResource("Resource_po3mx")
+avilable_types = Array[String](["BOOTS"])
+slot_name = "demo2_slot_2"
+
+[sub_resource type="Resource" id="Resource_ea0ju"]
+script = ExtResource("3_isn5n")
+item_id = "1001"
+type = "ARMOR"
+item_level = 1
+item_type = 3
+icon = ExtResource("5_rcg03")
+columns = 2
+rows = 3
+metadata/_custom_type_script = "uid://c81d67advvltj"
+
+[sub_resource type="Resource" id="Resource_w8sdd"]
+script = ExtResource("1_hg3ko")
+equipped_item = SubResource("Resource_ea0ju")
+avilable_types = Array[String](["ANY"])
+slot_name = "item_solt_1"
+
+[sub_resource type="Resource" id="Resource_jv67b"]
+script = ExtResource("7_0tnlu")
+stack_size = 99
+current_amount = 16
+item_id = "2000"
+type = "POTION"
+icon = ExtResource("6_po3mx")
+rows = 2
+metadata/_custom_type_script = "uid://x8lw6iyk5rf5"
+
+[sub_resource type="Resource" id="Resource_c48oo"]
+script = ExtResource("1_hg3ko")
+equipped_item = SubResource("Resource_jv67b")
+avilable_types = Array[String](["ANY"])
+slot_name = "item_solt_2"
+
+[sub_resource type="Resource" id="Resource_jjlbx"]
+script = ExtResource("9_w8sdd")
+stack_size = 99
+item_id = "2001"
+type = "JEWEL"
+layer_type = 0
+item_level = 3
+item_type = 5
+icon = ExtResource("8_ea0ju")
+metadata/_custom_type_script = "uid://bm5efdrlci0qk"
+
+[sub_resource type="Resource" id="Resource_4a0jc"]
+script = ExtResource("1_hg3ko")
+equipped_item = SubResource("Resource_jjlbx")
+avilable_types = Array[String](["ANY"])
+slot_name = "item_solt_3"
+
+[resource]
+script = ExtResource("4_d7m8m")
+_slot_data_map = Dictionary[String, ExtResource("1_hg3ko")]({
+"demo2_slot_1": SubResource("Resource_rcg03"),
+"demo2_slot_2": SubResource("Resource_0tnlu"),
+"item_solt_1": SubResource("Resource_w8sdd"),
+"item_solt_2": SubResource("Resource_c48oo"),
+"item_solt_3": SubResource("Resource_4a0jc")
+})
