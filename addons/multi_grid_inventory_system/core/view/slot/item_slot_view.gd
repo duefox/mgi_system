@@ -74,12 +74,12 @@ var container_name: String = MGIS.DEFAULT_SLOT_NAME
 		stack_num_color = value
 		queue_redraw()
 ## 堆叠数量的描边大小
-@export var stack_outline_size: int = 0:
+@export var stack_outline_size: int = BaseGridView.DEFAULT_STACK_OUTLINE_SIZE:
 	set(value):
 		stack_outline_size = value
 		queue_redraw()
 ## 堆叠数量的描边颜色
-@export var stack_outline_color: Color = Color.BLACK:
+@export var stack_outline_color: Color = BaseGridView.DEFAULT_STACK_OUTLINE_COLOR:
 	set(value):
 		stack_outline_color = value
 		queue_redraw()

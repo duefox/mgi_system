@@ -111,7 +111,12 @@ func pickup_single_to_moving(container_view: BaseContainerView, grid_id: Vector2
 		single_item.current_amount = 1
 		item_on_grid.current_amount -= 1
 
-		moving_service.move_item_by_data(single_item, Vector2i.ZERO, container_view.base_size)
+		# 获取字体
+		var font = null
+		if "stack_num_font" in container_view:
+			font = container_view.stack_num_font
+
+		moving_service.move_item_by_data(single_item, Vector2i.ZERO, container_view.base_size, font)
 
 		if item_on_grid.current_amount <= 0:
 			remove_item_by_data(inv_name, item_on_grid)
@@ -178,7 +183,13 @@ func split_item(container_view: BaseContainerView, grid_id: Vector2i, offset: Ve
 			MGIS.sig_inv_item_updated.emit(inv_name, grid_id)
 			var new_item = item.duplicate()
 			new_item.current_amount = new_amount_2
-			MGIS.moving_item_service.move_item_by_data(new_item, offset, base_size)
+			# 获取源容器的字体配置
+			var font = null
+			# 检查容器是否有字体属性 (BaseContainerView 和 ItemSlotView 都有)
+			if container_view and "stack_num_font" in container_view:
+				font = container_view.stack_num_font
+
+			MGIS.moving_item_service.move_item_by_data(new_item, offset, base_size, font)
 			return new_item
 	return null
 

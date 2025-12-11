@@ -99,17 +99,17 @@ class_name BaseContainerView
 		stack_num_margin = value
 		queue_redraw()
 ## 堆叠数量的颜色
-@export var stack_num_color: Color = Color("91d553"):
+@export var stack_num_color: Color = BaseGridView.DEFAULT_STACK_NUM_COLOR:
 	set(value):
 		stack_num_color = value
 		queue_redraw()
 ## 堆叠数量的描边大小
-@export var stack_outline_size: int = 4:
+@export var stack_outline_size: int = BaseGridView.DEFAULT_STACK_OUTLINE_SIZE:
 	set(value):
 		stack_outline_size = value
 		queue_redraw()
 ## 堆叠数量的描边颜色
-@export var stack_outline_color: Color = Color.BLACK:
+@export var stack_outline_color: Color = BaseGridView.DEFAULT_STACK_OUTLINE_COLOR:
 	set(value):
 		stack_outline_color = value
 		queue_redraw()

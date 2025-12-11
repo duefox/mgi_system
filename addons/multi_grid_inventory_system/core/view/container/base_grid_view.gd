@@ -12,13 +12,13 @@ const DEFAULT_EMPTY_COLOR: Color = Color.AZURE
 ## 默认禁用颜色
 const DEFAULT_DISABLED_COLOR: Color = Color.DARK_GRAY
 ## 默认占用颜色
-const DEFAULT_TAKEN_COLOR: Color = Color("989f9a62")
+const DEFAULT_TAKEN_COLOR: Color = Color("989f9a64")
 ## 默认冲突颜色
-const DEFAULT_CONFLICT_COLOR: Color = Color("ff000063")
+const DEFAULT_CONFLICT_COLOR: Color = Color("ff000064")
 ## 默认可用颜色
-const DEFAULT_AVILABLE_COLOR: Color = Color("00be0b62")
+const DEFAULT_AVILABLE_COLOR: Color = Color("00be0b64")
 ## 默认堆叠文本颜色stack_num_color
-const DEFAULT_STACK_NUM_COLOR: Color = Color("91d553")
+const DEFAULT_STACK_NUM_COLOR: Color = Color("ed870e")
 ## 默认堆叠文本描边颜色stack_outline_color
 const DEFAULT_STACK_OUTLINE_COLOR: Color = Color.BLACK
 ## 默认堆叠文本描边大小stack_outline_size

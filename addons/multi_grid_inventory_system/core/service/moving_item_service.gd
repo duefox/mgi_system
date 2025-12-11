@@ -35,35 +35,41 @@ func clear_moving_item() -> void:
 
 
 ## 纯粹的数据移动 (底层函数，不发送 Pickup 信号，防止与旋转混淆)
-func move_item_by_data(item_data: BaseItemData, offset: Vector2i, base_size: int) -> void:
+func move_item_by_data(item_data: BaseItemData, offset: Vector2i, base_size: int, font: Font = null) -> void:
 	# 强制中心对齐逻辑
 	offset = Vector2i.ZERO
 	self.moving_item = item_data
 	self.moving_item_offset = offset
-	self.moving_item_view = ItemView.new(item_data, base_size)
+	self.moving_item_view = ItemView.new(item_data, base_size, font)
 	get_moving_item_layer().add_child(moving_item_view)
 	moving_item_view.move(offset)
 	if drop_area_view:
 		drop_area_view.show()
 
 
-## [修改] 从网格拿起物品
+## 从网格拿起物品
 func move_item_by_grid(inv_name: String, grid_id: Vector2i, offset: Vector2i, base_size: int) -> void:
 	if moving_item:
 		push_error("Already had moving item.")
 		return
 	var item_data = MGIS.inventory_service.find_item_data_by_grid(inv_name, grid_id)
 	if item_data:
-		move_item_by_data(item_data, offset, base_size)
+		# 获取源容器的字体配置
+		var font = null
+		var container_view = MGIS.get_container_view(inv_name)
+		# 检查容器是否有字体属性 (BaseContainerView 和 ItemSlotView 都有)
+		if container_view and "stack_num_font" in container_view:
+			font = container_view.stack_num_font
+		# 传递字体给
+		move_item_by_data(item_data, offset, base_size, font)
 		MGIS.inventory_service.remove_item_by_data(inv_name, item_data)
 		if drop_area_view:
 			drop_area_view.show()
-
-		# [新增] 发送拿起信号
+		# 发送拿起信号
 		MGIS.sig_item_picked_up.emit(item_data)
 
 
-## [修改] 旋转拖拽物品
+## 旋转拖拽物品
 func rotate_item(inv_name: String, base_size: int) -> void:
 	if not is_instance_valid(moving_item):
 		return
@@ -75,8 +81,14 @@ func rotate_item(inv_name: String, base_size: int) -> void:
 
 	# 2. 重建 View
 	moving_item_view.queue_free()
+	# 获取源容器的字体配置
+	var font = null
+	var container_view = MGIS.get_container_view(inv_name)
+	# 检查容器是否有字体属性 (BaseContainerView 和 ItemSlotView 都有)
+	if container_view and "stack_num_font" in container_view:
+		font = container_view.stack_num_font
 	# offset 传 0 即可
-	move_item_by_data(moving_item, Vector2i.ZERO, base_size)
+	move_item_by_data(moving_item, Vector2i.ZERO, base_size, font)
 
 	# [新增] 发送旋转信号
 	MGIS.sig_item_rotated.emit(moving_item)

@@ -149,7 +149,14 @@ func move_item(slot_name: String, base_size: int) -> void:
 	var item_data = get_slot(slot_name).equipped_item
 	if item_data:
 		if _item_slot_repository.get_slot(slot_name).unequip():
-			MGIS.moving_item_service.move_item_by_data(item_data, Vector2i.ZERO, base_size)
+			# 获取源容器的字体配置
+			var font = null
+			var container_view = MGIS.get_container_view(slot_name)
+			# 检查容器是否有字体属性 (BaseContainerView 和 ItemSlotView 都有)
+			if container_view and "stack_num_font" in container_view:
+				font = container_view.stack_num_font
+
+			MGIS.moving_item_service.move_item_by_data(item_data, Vector2i.ZERO, base_size, font)
 			MGIS.sig_slot_item_unequipped.emit(slot_name, item_data)
 
 			# [新增] 发送拿起信号

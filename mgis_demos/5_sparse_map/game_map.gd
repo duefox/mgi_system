@@ -5,7 +5,7 @@ class_name GameMap
 # 地面层
 @export var ground_layer: MapView
 # 家具层
-@export var furniture_layer: MapView
+@export var interact_layer: MapView
 
 # --- 模式缓存 ---
 var _is_build_mode: bool = false
@@ -33,11 +33,11 @@ func _gui_input(event: InputEvent) -> void:
 			# 操作地面层
 			ground_layer.proxy_input(event)
 			# 确保家具层不高亮/不响应
-			furniture_layer.clear_hover_state()
+			interact_layer.clear_hover_state()
 
 		else:
 			# 操作家具层 (默认)
-			furniture_layer.proxy_input(event)
+			interact_layer.proxy_input(event)
 			ground_layer.clear_hover_state()
 
 	# --- 情况 B: 选择/交互 (手上没物品) ---
@@ -59,19 +59,19 @@ func _gui_input(event: InputEvent) -> void:
 		# 我们把输入同时发给两层？不行，会双重高亮。
 		# 我们需要查询一下家具层：鼠标下有东西吗？
 
-		var mouse_pos = furniture_layer.get_local_mouse_position()  # 假设对齐
-		var grid_pos = Vector2i(floor(mouse_pos.x / furniture_layer.base_size), floor(mouse_pos.y / furniture_layer.base_size))
+		var mouse_pos = interact_layer.get_local_mouse_position()  # 假设对齐
+		var grid_pos = Vector2i(floor(mouse_pos.x / interact_layer.base_size), floor(mouse_pos.y / interact_layer.base_size))
 
-		var has_furniture = MGIS.inventory_service.find_item_data_by_grid(furniture_layer.container_name, grid_pos) != null
+		var has_furniture = MGIS.inventory_service.find_item_data_by_grid(interact_layer.container_name, grid_pos) != null
 
 		if has_furniture:
 			# 鼠标下有家具 -> 家具层响应
-			furniture_layer.proxy_input(event)
+			interact_layer.proxy_input(event)
 			ground_layer.clear_hover_state()
 		else:
 			# 鼠标下没家具 -> 地面层响应 (比如高亮地板详情)
 			ground_layer.proxy_input(event)
-			furniture_layer.clear_hover_state()
+			interact_layer.clear_hover_state()
 
 
 # --- 辅助函数 ---
@@ -86,11 +86,11 @@ func _is_ground_item(item: BaseItemData) -> bool:
 # 鼠标移出整个大地图区域
 func _on_mouse_exited_map() -> void:
 	ground_layer.clear_hover_state()
-	furniture_layer.clear_hover_state()
+	interact_layer.clear_hover_state()
 
 
 # 切换模式 (由外部 UI 调用)
 func set_build_mode(enabled: bool) -> void:
 	_is_build_mode = enabled
 	ground_layer.is_build_mode = enabled
-	furniture_layer.is_build_mode = enabled
+	interact_layer.is_build_mode = enabled

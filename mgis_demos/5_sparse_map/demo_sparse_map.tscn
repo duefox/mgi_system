@@ -105,14 +105,13 @@ offset_bottom = 600.0
 horizontal_scroll_mode = 2
 vertical_scroll_mode = 2
 
-[node name="GameMap" type="Control" parent="SparseMap/ScrollContainer" node_paths=PackedStringArray("ground_layer", "furniture_layer")]
+[node name="GameMap" type="Control" parent="SparseMap/ScrollContainer" node_paths=PackedStringArray("ground_layer")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 2
 script = ExtResource("6_lhlms")
 ground_layer = NodePath("MapBootView")
-furniture_layer = NodePath("MapView")
 
 [node name="MapBootView" type="Control" parent="SparseMap/ScrollContainer/GameMap"]
 unique_name_in_owner = true
